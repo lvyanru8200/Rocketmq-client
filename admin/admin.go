@@ -20,6 +20,7 @@ package admin
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/apache/rocketmq-client-go/v2/internal"
 	"github.com/apache/rocketmq-client-go/v2/internal/remote"
 	"github.com/apache/rocketmq-client-go/v2/primitive"
@@ -33,10 +34,11 @@ type Admin interface {
 	CreateTopic(ctx context.Context, opts ...OptionCreate) error
 	DeleteTopic(ctx context.Context, opts ...OptionDelete) error
 	//TODO
-	TopicList(ctx context.Context, nameserver string) (*simplejson.Json, error)
+	TopicList(ctx context.Context, opts ...OptionTopicList) (*simplejson.Json, error)
 	GetBrokerRuntimeInfo(ctx context.Context, nameserver string, broker string) (*simplejson.Json, error)
 	GetConsumeStats(ctx context.Context, broker string) (*simplejson.Json, error)
 	WipeWritePerm(ctx context.Context, brokername string, nameserver string) error
+	QueryTopicConsumeByWho(ctx context.Context, opts ...OptionQueryTopicConsume) (*simplejson.Json, error)
 	Close() error
 }
 
@@ -112,6 +114,7 @@ func (a *admin) CreateTopic(ctx context.Context, opts ...OptionCreate) error {
 	}
 
 	cmd := remote.NewRemotingCommand(internal.ReqCreateTopic, request, nil)
+	fmt.Println(cmd.ExtFields["topic"])
 	_, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
 	if err != nil {
 		rlog.Error("create topic error", map[string]interface{}{
@@ -197,12 +200,17 @@ func (a *admin) DeleteTopic(ctx context.Context, opts ...OptionDelete) error {
 	return nil
 }
 
-func (a *admin) TopicList(ctx context.Context, nameserver string) (*simplejson.Json, error) {
+func (a *admin) TopicList(ctx context.Context, opts ...OptionTopicList) (*simplejson.Json, error) {
+	cfg := defaultTopicList()
+	for _, apply := range opts {
+		apply(&cfg)
+	}
 	request := &internal.TopicListRequestHeader{
-		Nameserver: nameserver,
+		Nameserver: cfg.Nameserver,
 	}
 	cmd := remote.NewRemotingCommand(internal.ReqGetAllTopicListFromNameServer, request, nil)
-	opout, err := a.cli.InvokeSync(ctx, nameserver, cmd, 5*time.Second)
+	opout, err := a.cli.InvokeSync(ctx, cfg.Nameserver, cmd, 5*time.Second)
+	fmt.Println(string(opout.Body))
 	if err != nil {
 		rlog.Error("获取topic列表失败", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
@@ -278,6 +286,34 @@ func (a *admin) WipeWritePerm(ctx context.Context, brokername string, nameserver
 		return err
 	}
 	return nil
+}
+
+func (a *admin) QueryTopicConsumeByWho(ctx context.Context, opts ...OptionQueryTopicConsume) (*simplejson.Json, error) {
+	cfg := defaultQueryTopicConsume()
+	for _, apply := range opts {
+		apply(&cfg)
+	}
+	request := &internal.QueryTopicConsumeByWhoRequestHeader{
+		BrokerAddr: cfg.Brokeraddr,
+		Topic:      cfg.Topic,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqQueryTopicConsumeByWho, request, nil)
+	fmt.Println(cmd.ExtFields["topic"])
+	output, err := a.cli.InvokeSync(ctx, cfg.Brokeraddr, cmd, 5*time.Second)
+	if err != nil {
+		rlog.Error("获取topic对应消费组失败", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("获取topic对应消费组成功", map[string]interface{}{
+			rlog.LogKeyBroker: request.Topic,
+		})
+	}
+	json, err := simplejson.NewJson(output.Body)
+	if err != nil {
+		return nil, err
+	}
+	return json, nil
 }
 
 func (a *admin) Close() error {

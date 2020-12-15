@@ -49,9 +49,11 @@ const (
 	ReqGetTopicStatsInfo             = int16(202)
 	ReqWipeWritePermOfBroker         = int16(205)
 	ReqGetAllTopicListFromNameServer = int16(206)
+	ReqGetConsumeStats               = int16(208)
 	ReqDeleteTopicInBroker           = int16(215)
 	ReqDeleteTopicInNameSrv          = int16(216)
 	ReqResetConsuemrOffset           = int16(220)
+	ReqQueryTopicConsumeByWho        = int16(300)
 	ReqGetConsumerRunningInfo        = int16(307)
 	ReqConsumeMessageDirectly        = int16(309)
 	ReqGetBrokerConsumeStats         = int16(317)
@@ -396,7 +398,7 @@ type TopicListRequestHeader struct {
 
 func (request *TopicListRequestHeader) Encode() map[string]string {
 	maps := make(map[string]string)
-	maps["topic"] = request.Nameserver
+	maps["nameserver"] = request.Nameserver
 	return maps
 }
 
@@ -451,4 +453,20 @@ func (request *WipeWritePermOfBrokerRequestHeader) Encode() map[string]string {
 	maps["brokername"] = request.Brokername
 	maps["nameserver"] = request.Nameserver
 	return maps
+}
+
+type QueryTopicConsumeByWhoRequestHeader struct {
+	BrokerAddr string
+	Topic      string
+}
+
+func (request *QueryTopicConsumeByWhoRequestHeader) Encode() map[string]string {
+	maps := make(map[string]string)
+	maps["brokeraddr"] = request.BrokerAddr
+	maps["topic"] = request.Topic
+	return maps
+}
+
+func (request *QueryTopicConsumeByWhoRequestHeader) Decode() map[string]string {
+	return nil
 }

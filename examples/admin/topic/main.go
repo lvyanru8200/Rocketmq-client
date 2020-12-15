@@ -36,15 +36,15 @@ func main() {
 	}
 
 	//create topic
-	/*err = testAdmin.CreateTopic(
-		context.Background(),
-		admin.WithTopicCreate(topic),
-		admin.WithBrokerAddrCreate(brokerAddr),
-	)
-	if err != nil {
-		fmt.Println("Create topic error:", err.Error())
-	}*/
-
+	/*	err = testAdmin.CreateTopic(
+			context.Background(),
+			admin.WithTopicCreate("8888"),
+			admin.WithBrokerAddrCreate(brokerAddr),
+		)
+		if err != nil {
+			fmt.Println("Create topic error:", err.Error())
+		}
+	*/
 	//deletetopic
 	/*	err = testAdmin.DeleteTopic(
 			context.Background(),
@@ -56,22 +56,24 @@ func main() {
 			fmt.Println("Delete topic error:", err.Error())
 		}*/
 
-	/*opt,err:=testAdmin.GetBrokerClusterInfo(
-	context.Background(),
-	"10.21.7.5:30021",
-	"10.21.7.6:54874",
-	)*/
-	/*	testAdmin.GetConsumeStats(
+	/*	json,err:=testAdmin.GetBrokerRuntimeInfo(
 		context.Background(),
+		"10.21.7.5:30021",
 		"10.21.7.6:54874",
-	)*/
-	/*json,err:=testAdmin.TopicList(context.Background(),"10.21.7.5:30021")
-	fmt.Println(json)*/
-	/*fmt.Println(json.Get("topicList").GetIndex(0))*/
-	err = testAdmin.WipeWritePerm(context.Background(), "n11", "10.21.7.5:30021")
-	if err != nil {
-		fmt.Println(err)
-	}
+		)*/
+
+	/*		json,_:=testAdmin.GetConsumeStats(
+			context.Background(),
+			"10.21.7.6:54874",
+		)*/
+	/*json,err:=testAdmin.TopicList(context.Background(),admin.WithNameserver("10.21.7.5:30021"))*/
+	/*json,_:=testAdmin.StatsAll(context.Background(),"10.21.7.6:54874","teststatus")*/
+	json, err := testAdmin.QueryTopicConsumeByWho(context.Background(), admin.WithBrokeraddr("10.21.7.6:54874"), admin.WithTopic("teststatus"))
+	fmt.Println(json)
+	/*	err = testAdmin.WipeWritePerm(context.Background(), "n11", "10.21.7.5:30021")
+		if err != nil {
+			fmt.Println(err)
+		}*/
 	err = testAdmin.Close()
 	if err != nil {
 		fmt.Printf("Shutdown admin error: %s", err.Error())
