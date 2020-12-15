@@ -129,3 +129,25 @@ func WithNameSrvAddr(NameSrvAddr []string) OptionDelete {
 		opts.NameSrvAddr = NameSrvAddr
 	}
 }
+
+type OptionTopicList func(*TopicListConfig)
+
+type TopicListConfig struct {
+	Topic string
+}
+
+func defaultTopicList() TopicListConfig {
+	opts := TopicListConfig{}
+	return opts
+}
+
+type OptionClusterList func(*ClusterListConfig)
+
+type ClusterListConfig struct {
+	NamesvrAddr string
+}
+
+func defaultClusterList() ClusterListConfig {
+	opts := ClusterListConfig{}
+	return opts
+}

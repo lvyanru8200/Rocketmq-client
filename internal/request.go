@@ -30,6 +30,7 @@ const (
 	ReqQueryConsumerOffset           = int16(14)
 	ReqUpdateConsumerOffset          = int16(15)
 	ReqCreateTopic                   = int16(17)
+	ReqGetBrokerRuntimeInfo          = int16(28)
 	ReqSearchOffsetByTimestamp       = int16(29)
 	ReqGetMaxOffset                  = int16(30)
 	ReqGetMinOffset                  = int16(31)
@@ -45,12 +46,14 @@ const (
 	ReqSendBatchMessage              = int16(320)
 	ReqCheckTransactionState         = int16(39)
 	ReqNotifyConsumerIdsChanged      = int16(40)
+	ReqGetTopicStatsInfo             = int16(202)
 	ReqGetAllTopicListFromNameServer = int16(206)
 	ReqDeleteTopicInBroker           = int16(215)
 	ReqDeleteTopicInNameSrv          = int16(216)
 	ReqResetConsuemrOffset           = int16(220)
 	ReqGetConsumerRunningInfo        = int16(307)
 	ReqConsumeMessageDirectly        = int16(309)
+	ReqGetBrokerConsumeStats         = int16(317)
 )
 
 type SendMessageRequestHeader struct {
@@ -393,8 +396,27 @@ type TopicListRequestHeader struct {
 func (request *TopicListRequestHeader) Encode() map[string]string {
 	maps := make(map[string]string)
 	maps["topic"] = request.Topic
-
 	return maps
+}
+
+func (request *TopicListRequestHeader) Decode() map[string]string {
+	return nil
+}
+
+type ClusterListRequestHeader struct {
+	NamesvrAddr string
+	BrokerAddr  string
+}
+
+func (request *ClusterListRequestHeader) Encode() map[string]string {
+	maps := make(map[string]string)
+	maps["namesvraddr"] = request.NamesvrAddr
+	maps["brokeraddr"] = request.BrokerAddr
+	return maps
+}
+
+func (request *ClusterListRequestHeader) Decode() map[string]string {
+	return nil
 }
 
 type DeleteTopicRequestHeader struct {
@@ -405,5 +427,15 @@ func (request *DeleteTopicRequestHeader) Encode() map[string]string {
 	maps := make(map[string]string)
 	maps["topic"] = request.Topic
 
+	return maps
+}
+
+type BrokerConsumeStatRequestHeader struct {
+	Brokeraddr string
+}
+
+func (request *BrokerConsumeStatRequestHeader) Encode() map[string]string {
+	maps := make(map[string]string)
+	maps["brokeraddr"] = request.Brokeraddr
 	return maps
 }

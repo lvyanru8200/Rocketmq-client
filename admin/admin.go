@@ -18,22 +18,24 @@ limitations under the License.
 package admin
 
 import (
+	"bytes"
 	"context"
-	"sync"
-	"time"
-
 	"github.com/apache/rocketmq-client-go/v2/internal"
 	"github.com/apache/rocketmq-client-go/v2/internal/remote"
 	"github.com/apache/rocketmq-client-go/v2/primitive"
 	"github.com/apache/rocketmq-client-go/v2/rlog"
+	"github.com/bitly/go-simplejson"
+	"sync"
+	"time"
 )
 
 type Admin interface {
 	CreateTopic(ctx context.Context, opts ...OptionCreate) error
 	DeleteTopic(ctx context.Context, opts ...OptionDelete) error
 	//TODO
-	//TopicList(ctx context.Context, mq *primitive.MessageQueue) (*remote.RemotingCommand, error)
-	//GetBrokerClusterInfo(ctx context.Context) (*remote.RemotingCommand, error)
+	TopicList(ctx context.Context, nameserver string) (string, error)
+	GetBrokerRuntimeInfo(ctx context.Context, nameserver string, broker string) (*simplejson.Json, error)
+	GetConsumeStats(ctx context.Context, broker string) (*simplejson.Json, error)
 	Close() error
 }
 
@@ -192,6 +194,64 @@ func (a *admin) DeleteTopic(ctx context.Context, opts ...OptionDelete) error {
 		"nameServer":      cfg.NameSrvAddr,
 	})
 	return nil
+}
+
+func (a *admin) TopicList(ctx context.Context, nameserver string) (string, error) {
+	cfg := defaultTopicList()
+	request := &internal.TopicListRequestHeader{
+		Topic: cfg.Topic,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqGetAllTopicListFromNameServer, request, nil)
+	opout, err := a.cli.InvokeSync(ctx, nameserver, cmd, 5*time.Second)
+	if err != nil {
+		rlog.Error("获取topic列表失败", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("获取topic列表成功", map[string]interface{}{})
+	}
+	return string(opout.Body), nil
+}
+
+func (a *admin) GetBrokerRuntimeInfo(ctx context.Context, nameserver string, broker string) (*simplejson.Json, error) {
+	request := &internal.ClusterListRequestHeader{
+		NamesvrAddr: nameserver,
+		BrokerAddr:  broker,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqGetBrokerRuntimeInfo, request, nil)
+	opout, err := a.cli.InvokeSync(ctx, broker, cmd, 5*time.Second)
+	json, err := simplejson.NewFromReader(bytes.NewBuffer(opout.Body))
+	if err != nil {
+		rlog.Error("获取cluster list失败", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("获取cluster list成功", map[string]interface{}{})
+	}
+	if err != nil {
+		return nil, err
+	}
+	return json, nil
+}
+
+func (a *admin) GetConsumeStats(ctx context.Context, broker string) (*simplejson.Json, error) {
+	request := &internal.BrokerConsumeStatRequestHeader{
+		Brokeraddr: broker,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqGetBrokerConsumeStats, request, nil)
+	output, err := a.cli.InvokeSync(ctx, broker, cmd, 5*time.Second)
+	if err != nil {
+		rlog.Error("获取cluster list失败", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("获取cluster list成功", map[string]interface{}{})
+	}
+	json, err := simplejson.NewJson(output.Body)
+	if err != nil {
+		return nil, err
+	}
+	return json, nil
 }
 
 func (a *admin) Close() error {
