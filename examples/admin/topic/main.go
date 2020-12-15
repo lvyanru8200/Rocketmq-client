@@ -61,11 +61,17 @@ func main() {
 	"10.21.7.5:30021",
 	"10.21.7.6:54874",
 	)*/
-	testAdmin.GetConsumeStats(
+	/*	testAdmin.GetConsumeStats(
 		context.Background(),
 		"10.21.7.6:54874",
-	)
-
+	)*/
+	/*json,err:=testAdmin.TopicList(context.Background(),"10.21.7.5:30021")
+	fmt.Println(json)*/
+	/*fmt.Println(json.Get("topicList").GetIndex(0))*/
+	err = testAdmin.WipeWritePerm(context.Background(), "n11", "10.21.7.5:30021")
+	if err != nil {
+		fmt.Println(err)
+	}
 	err = testAdmin.Close()
 	if err != nil {
 		fmt.Printf("Shutdown admin error: %s", err.Error())

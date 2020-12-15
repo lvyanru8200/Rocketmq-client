@@ -47,6 +47,7 @@ const (
 	ReqCheckTransactionState         = int16(39)
 	ReqNotifyConsumerIdsChanged      = int16(40)
 	ReqGetTopicStatsInfo             = int16(202)
+	ReqWipeWritePermOfBroker         = int16(205)
 	ReqGetAllTopicListFromNameServer = int16(206)
 	ReqDeleteTopicInBroker           = int16(215)
 	ReqDeleteTopicInNameSrv          = int16(216)
@@ -390,12 +391,12 @@ func (request *CreateTopicRequestHeader) Encode() map[string]string {
 }
 
 type TopicListRequestHeader struct {
-	Topic string
+	Nameserver string
 }
 
 func (request *TopicListRequestHeader) Encode() map[string]string {
 	maps := make(map[string]string)
-	maps["topic"] = request.Topic
+	maps["topic"] = request.Nameserver
 	return maps
 }
 
@@ -437,5 +438,17 @@ type BrokerConsumeStatRequestHeader struct {
 func (request *BrokerConsumeStatRequestHeader) Encode() map[string]string {
 	maps := make(map[string]string)
 	maps["brokeraddr"] = request.Brokeraddr
+	return maps
+}
+
+type WipeWritePermOfBrokerRequestHeader struct {
+	Brokername string
+	Nameserver string
+}
+
+func (request *WipeWritePermOfBrokerRequestHeader) Encode() map[string]string {
+	maps := make(map[string]string)
+	maps["brokername"] = request.Brokername
+	maps["nameserver"] = request.Nameserver
 	return maps
 }

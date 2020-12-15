@@ -33,9 +33,10 @@ type Admin interface {
 	CreateTopic(ctx context.Context, opts ...OptionCreate) error
 	DeleteTopic(ctx context.Context, opts ...OptionDelete) error
 	//TODO
-	TopicList(ctx context.Context, nameserver string) (string, error)
+	TopicList(ctx context.Context, nameserver string) (*simplejson.Json, error)
 	GetBrokerRuntimeInfo(ctx context.Context, nameserver string, broker string) (*simplejson.Json, error)
 	GetConsumeStats(ctx context.Context, broker string) (*simplejson.Json, error)
+	WipeWritePerm(ctx context.Context, brokername string, nameserver string) error
 	Close() error
 }
 
@@ -196,10 +197,9 @@ func (a *admin) DeleteTopic(ctx context.Context, opts ...OptionDelete) error {
 	return nil
 }
 
-func (a *admin) TopicList(ctx context.Context, nameserver string) (string, error) {
-	cfg := defaultTopicList()
+func (a *admin) TopicList(ctx context.Context, nameserver string) (*simplejson.Json, error) {
 	request := &internal.TopicListRequestHeader{
-		Topic: cfg.Topic,
+		Nameserver: nameserver,
 	}
 	cmd := remote.NewRemotingCommand(internal.ReqGetAllTopicListFromNameServer, request, nil)
 	opout, err := a.cli.InvokeSync(ctx, nameserver, cmd, 5*time.Second)
@@ -210,7 +210,11 @@ func (a *admin) TopicList(ctx context.Context, nameserver string) (string, error
 	} else {
 		rlog.Info("获取topic列表成功", map[string]interface{}{})
 	}
-	return string(opout.Body), nil
+	json, err := simplejson.NewJson(opout.Body)
+	if err != nil {
+		return nil, err
+	}
+	return json, nil
 }
 
 func (a *admin) GetBrokerRuntimeInfo(ctx context.Context, nameserver string, broker string) (*simplejson.Json, error) {
@@ -222,11 +226,11 @@ func (a *admin) GetBrokerRuntimeInfo(ctx context.Context, nameserver string, bro
 	opout, err := a.cli.InvokeSync(ctx, broker, cmd, 5*time.Second)
 	json, err := simplejson.NewFromReader(bytes.NewBuffer(opout.Body))
 	if err != nil {
-		rlog.Error("获取cluster list失败", map[string]interface{}{
+		rlog.Error("获取BrokerInfo失败", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("获取cluster list成功", map[string]interface{}{})
+		rlog.Info("获取BrokerInfo成功", map[string]interface{}{})
 	}
 	if err != nil {
 		return nil, err
@@ -241,17 +245,39 @@ func (a *admin) GetConsumeStats(ctx context.Context, broker string) (*simplejson
 	cmd := remote.NewRemotingCommand(internal.ReqGetBrokerConsumeStats, request, nil)
 	output, err := a.cli.InvokeSync(ctx, broker, cmd, 5*time.Second)
 	if err != nil {
-		rlog.Error("获取cluster list失败", map[string]interface{}{
+		rlog.Error("获取ConsumeStats失败", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("获取cluster list成功", map[string]interface{}{})
+		rlog.Info("获取ConsumeStats成功", map[string]interface{}{})
 	}
 	json, err := simplejson.NewJson(output.Body)
 	if err != nil {
 		return nil, err
 	}
 	return json, nil
+}
+
+func (a *admin) WipeWritePerm(ctx context.Context, brokername string, nameserver string) error {
+	request := &internal.WipeWritePermOfBrokerRequestHeader{
+		Brokername: brokername,
+		Nameserver: nameserver,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqWipeWritePermOfBroker, request, nil)
+	_, err := a.cli.InvokeSync(ctx, nameserver, cmd, 5*time.Second)
+	if err != nil {
+		rlog.Error("禁止写失败", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("禁止写成功", map[string]interface{}{
+			rlog.LogKeyBroker: request.Brokername,
+		})
+	}
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *admin) Close() error {
