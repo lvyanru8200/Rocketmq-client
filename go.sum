@@ -1,4 +1,3 @@
-github.com/apache/rocketmq-client-go v1.2.4 h1:UQu4z1wKsszrZyMk7DJrsQqw7lgBYXiWNYD8ME9X7EI=
 github.com/apache/rocketmq-client-go/v2 v2.0.0 h1:D6jFj3DcNjWyjWn5N/R7Eq8v5kLqlgkFnT/DNQFnWlM=
 github.com/apache/rocketmq-client-go/v2 v2.0.0/go.mod h1:oEZKFDvS7sz/RWU0839+dQBupazyBV7WX5cP6nrio0Q=
 github.com/bitly/go-simplejson v0.5.0 h1:6IH+V8/tVMab511d5bn4M7EwGXZf9Hj6i2xSwkNEM+Y=
