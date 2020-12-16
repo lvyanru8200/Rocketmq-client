@@ -28,10 +28,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/apache/rocketmq-client-go/v2/primitive"
-	"github.com/apache/rocketmq-client-go/v2/rlog"
 	"github.com/lvyanru8200/rocketmq-client-go/internal/remote"
 	"github.com/lvyanru8200/rocketmq-client-go/internal/utils"
+	"github.com/lvyanru8200/rocketmq-client-go/primitive"
+	"github.com/lvyanru8200/rocketmq-client-go/rlog"
 )
 
 const (
