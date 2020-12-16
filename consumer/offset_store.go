@@ -28,11 +28,11 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
-	"github.com/apache/rocketmq-client-go/v2/internal"
-	"github.com/apache/rocketmq-client-go/v2/internal/remote"
-	"github.com/apache/rocketmq-client-go/v2/internal/utils"
 	"github.com/apache/rocketmq-client-go/v2/primitive"
 	"github.com/apache/rocketmq-client-go/v2/rlog"
+	"github.com/lvyanru8200/rocketmq-client-go/internal"
+	"github.com/lvyanru8200/rocketmq-client-go/internal/remote"
+	"github.com/lvyanru8200/rocketmq-client-go/internal/utils"
 )
 
 type readType int
