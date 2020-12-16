@@ -20,7 +20,7 @@ package consumer
 import (
 	"sync"
 
-	"github.com/lvyanru8200/rocketmq-client-go/primitive"
+	"rocketmq-client-go/primitive"
 )
 
 type QueueLock struct {

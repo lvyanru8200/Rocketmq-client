@@ -32,11 +32,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
-	"github.com/lvyanru8200/rocketmq-client-go/internal"
-	"github.com/lvyanru8200/rocketmq-client-go/internal/remote"
-	"github.com/lvyanru8200/rocketmq-client-go/internal/utils"
-	"github.com/lvyanru8200/rocketmq-client-go/primitive"
-	"github.com/lvyanru8200/rocketmq-client-go/rlog"
+	"rocketmq-client-go/internal"
+	"rocketmq-client-go/internal/remote"
+	"rocketmq-client-go/internal/utils"
+	"rocketmq-client-go/primitive"
+	"rocketmq-client-go/rlog"
 )
 
 const (

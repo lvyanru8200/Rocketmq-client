@@ -25,7 +25,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	primitive "github.com/lvyanru8200/rocketmq-client-go/primitive"
+	primitive "rocketmq-client-go/primitive"
 )
 
 // MockRemotingClient is a mock of RemotingClient interface

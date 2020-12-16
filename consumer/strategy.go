@@ -22,9 +22,9 @@ import (
 
 	"stathat.com/c/consistent"
 
-	"github.com/lvyanru8200/rocketmq-client-go/internal/utils"
-	"github.com/lvyanru8200/rocketmq-client-go/primitive"
-	"github.com/lvyanru8200/rocketmq-client-go/rlog"
+	"rocketmq-client-go/internal/utils"
+	"rocketmq-client-go/primitive"
+	"rocketmq-client-go/rlog"
 )
 
 // Strategy Algorithm for message allocating between consumers

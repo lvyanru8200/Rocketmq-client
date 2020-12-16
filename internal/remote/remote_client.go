@@ -25,9 +25,9 @@ import (
 	"net"
 	"sync"
 
-	"github.com/lvyanru8200/rocketmq-client-go/primitive"
+	"rocketmq-client-go/primitive"
 
-	"github.com/lvyanru8200/rocketmq-client-go/rlog"
+	"rocketmq-client-go/rlog"
 )
 
 type ClientRequestFunc func(*RemotingCommand, net.Addr) *RemotingCommand
@@ -36,7 +36,7 @@ type TcpOption struct {
 	// TODO
 }
 
-//go:generate mockgen -source remote_client.go -destination mock_remote_client.go -self_package github.com/apache/rocketmq-client-go/v2/internal/remote  --package remote RemotingClient
+//go:generate mockgen -source remote_client.go -destination mock_remote_client.go -self_package rocketmq-client-go/internal/remote  --package remote RemotingClient
 type RemotingClient interface {
 	RegisterRequestFunc(code int16, f ClientRequestFunc)
 	RegisterInterceptor(interceptors ...primitive.Interceptor)
