@@ -26,6 +26,7 @@ import (
 	"github.com/apache/rocketmq-client-go/v2/primitive"
 	"github.com/apache/rocketmq-client-go/v2/rlog"
 	"github.com/bitly/go-simplejson"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -39,6 +40,11 @@ type Admin interface {
 	GetConsumeStats(ctx context.Context, broker string) (*simplejson.Json, error)
 	WipeWritePerm(ctx context.Context, brokername string, nameserver string) error
 	QueryTopicConsumeByWho(ctx context.Context, opts ...OptionQueryTopicConsume) (*simplejson.Json, error)
+	UpdateAndCreateSubscriptionGroup(ctx context.Context, opts ...OptionUpdatesubGroup) error
+	UpdateTopic(ctx context.Context, opts ...OptionCreate) error
+	GetConsumerRunningInfo(ctx context.Context, opts ...OptionConsumerInfo) (*simplejson.Json, error)
+	DeleteSubscriptionGroup(ctx context.Context, opts ...OptionDeleteSubGroup) error
+	GetConsumerOffset(ctx context.Context, opts ...OptionConsumerOffset) (int64, error)
 	Close() error
 }
 
@@ -114,7 +120,6 @@ func (a *admin) CreateTopic(ctx context.Context, opts ...OptionCreate) error {
 	}
 
 	cmd := remote.NewRemotingCommand(internal.ReqCreateTopic, request, nil)
-	fmt.Println(cmd.ExtFields["topic"])
 	_, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
 	if err != nil {
 		rlog.Error("create topic error", map[string]interface{}{
@@ -298,7 +303,6 @@ func (a *admin) QueryTopicConsumeByWho(ctx context.Context, opts ...OptionQueryT
 		Topic:      cfg.Topic,
 	}
 	cmd := remote.NewRemotingCommand(internal.ReqQueryTopicConsumeByWho, request, nil)
-	fmt.Println(cmd.ExtFields["topic"])
 	output, err := a.cli.InvokeSync(ctx, cfg.Brokeraddr, cmd, 5*time.Second)
 	if err != nil {
 		rlog.Error("获取topic对应消费组失败", map[string]interface{}{
@@ -314,6 +318,134 @@ func (a *admin) QueryTopicConsumeByWho(ctx context.Context, opts ...OptionQueryT
 		return nil, err
 	}
 	return json, nil
+}
+
+func (a *admin) UpdateAndCreateSubscriptionGroup(ctx context.Context, opts ...OptionUpdatesubGroup) error {
+	cfg := defaultOptionUpdatesubGroup()
+	for _, apply := range opts {
+		apply(&cfg)
+	}
+	request := &internal.UpdateAndCreateSubscriptionGroupRequestHeader{
+		GroupName:              cfg.GroupName,
+		ClusterName:            cfg.ClusterName,
+		ConsumeFromMinEnable:   cfg.ConsumeFromMinEnable,
+		ConsumeBroadcastEnable: cfg.ConsumeBroadcastEnable,
+		NamesrvAddr:            cfg.NamesrvAddr,
+		BrokerAddr:             cfg.BrokerAddr,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqUpdateAndCreateSubscriptionGroup, request, nil)
+	_, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
+	if err != nil {
+		rlog.Error("迁移消费组失败", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("迁移消费组成功", map[string]interface{}{
+			rlog.LogKeyBroker: cfg.BrokerAddr,
+		})
+	}
+	return err
+}
+
+func (a *admin) UpdateTopic(ctx context.Context, opts ...OptionCreate) error {
+	cfg := updateTopicConfig()
+	for _, apply := range opts {
+		apply(&cfg)
+	}
+
+	request := &internal.UpdateTopicRequestHeader{
+		Topic:           cfg.Topic,
+		ClusterName:     cfg.ClusterName,
+		TopicFilterType: cfg.TopicFilterType,
+	}
+
+	cmd := remote.NewRemotingCommand(internal.ReqCreateTopic, request, nil)
+	_, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
+	if err != nil {
+		rlog.Error("更新topic失败", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("更新topic成功", map[string]interface{}{
+			rlog.LogKeyBroker: cfg.BrokerAddr,
+		})
+	}
+	return err
+}
+
+func (a *admin) GetConsumerRunningInfo(ctx context.Context, opts ...OptionConsumerInfo) (*simplejson.Json, error) {
+	cfg := defaultOptionConsumerInfo()
+	for _, apply := range opts {
+		apply(&cfg)
+	}
+	request := &internal.GetConsumerRunningInfoRequestHeader{
+		ConsumerGroup: cfg.ConsumerGroup,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqGetConsumerRunningInfo, request, nil)
+	output, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
+	if err != nil {
+		rlog.Error("获取consumer信息失败", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("获取consumer信息成功", map[string]interface{}{
+			rlog.LogKeyBroker: cfg.BrokerAddr,
+		})
+	}
+	fmt.Println(output.String())
+	return nil, err
+}
+
+func (a *admin) DeleteSubscriptionGroup(ctx context.Context, opts ...OptionDeleteSubGroup) error {
+	cfg := defaultDeleteSubGroup()
+	for _, apply := range opts {
+		apply(&cfg)
+	}
+	request := &internal.DeleteSubscriptionGroupRequestHeader{
+		GroupName:  cfg.GroupName,
+		BrokerAddr: cfg.BrokerAddr,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqDeleteSubscriptionGroup, request, nil)
+	_, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
+	if err != nil {
+		rlog.Error("删除subGroup失败", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("删除subGroup成功", map[string]interface{}{
+			rlog.LogKeyBroker: cfg.BrokerAddr,
+		})
+	}
+	return err
+}
+
+func (a *admin) GetConsumerOffset(ctx context.Context, opts ...OptionConsumerOffset) (int64, error) {
+	cfg := defaultConsumerOffset()
+	for _, apply := range opts {
+		apply(&cfg)
+	}
+	request := &internal.QueryConsumerOffsetRequestHeader{
+		ConsumerGroup: cfg.ConsumerGroup,
+		Topic:         cfg.Topic,
+		QueueId:       cfg.QueueId,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqQueryConsumerOffset, request, nil)
+	output, err := a.cli.InvokeSync(ctx, "10.21.7.6:43213", cmd, 3*time.Second)
+	if err != nil {
+		rlog.Error("获得consumeroffset失败", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("获得consumeroffset成功", map[string]interface{}{})
+	}
+	off, err := strconv.ParseInt(output.ExtFields["offset"], 10, 64)
+	if err != nil {
+		rlog.Error("获取offset失败", map[string]interface{}{
+			rlog.LogKeyTopic:         cfg.Topic,
+			rlog.LogKeyConsumerGroup: cfg.ConsumerGroup,
+		})
+	}
+	return off, nil
 }
 
 func (a *admin) Close() error {

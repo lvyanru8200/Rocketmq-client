@@ -17,6 +17,10 @@ limitations under the License.
 
 package admin
 
+func updateTopicConfig() TopicConfigCreate {
+	opts := TopicConfigCreate{}
+	return opts
+}
 func defaultTopicConfigCreate() TopicConfigCreate {
 	opts := TopicConfigCreate{
 		DefaultTopic:    "defaultTopic",
@@ -40,9 +44,17 @@ type TopicConfigCreate struct {
 	TopicFilterType string
 	TopicSysFlag    int
 	Order           bool
+	ClusterName     string
+	NamesrvAddr     string
 }
 
 type OptionCreate func(*TopicConfigCreate)
+
+func WithTopicClusterName(clustername string) OptionCreate {
+	return func(opts *TopicConfigCreate) {
+		opts.ClusterName = clustername
+	}
+}
 
 func WithTopicCreate(Topic string) OptionCreate {
 	return func(opts *TopicConfigCreate) {
@@ -142,6 +154,7 @@ func defaultTopicList() TopicListConfig {
 }
 
 type OptionQueryTopicConsume func(config *QueryTopicConsumeConfig)
+
 type QueryTopicConsumeConfig struct {
 	Brokeraddr string
 	Topic      string
@@ -178,4 +191,175 @@ type ClusterListConfig struct {
 func defaultClusterList() ClusterListConfig {
 	opts := ClusterListConfig{}
 	return opts
+}
+
+type OptionUpdatesubGroup func(config *OptionUpdatesubGroupConfig)
+
+type OptionUpdatesubGroupConfig struct {
+	BrokerAddr             string
+	ClusterName            string
+	GroupName              string
+	BrokerId               string
+	NamesrvAddr            string
+	RetryQueueNums         int
+	RetryMaxTimes          int64
+	ConsumeEnable          bool
+	ConsumeFromMinEnable   bool
+	ConsumeBroadcastEnable bool
+}
+
+func defaultOptionUpdatesubGroup() OptionUpdatesubGroupConfig {
+	opts := OptionUpdatesubGroupConfig{}
+	return opts
+}
+func WithGroupName(groupname string) OptionUpdatesubGroup {
+	return func(opts *OptionUpdatesubGroupConfig) {
+		opts.GroupName = groupname
+	}
+}
+
+func WithGroupClusterName(clustername string) OptionUpdatesubGroup {
+	return func(opts *OptionUpdatesubGroupConfig) {
+		opts.ClusterName = clustername
+	}
+}
+
+func WithConsumeFromMin(t bool) OptionUpdatesubGroup {
+	return func(opts *OptionUpdatesubGroupConfig) {
+		opts.ConsumeFromMinEnable = t
+	}
+}
+
+func WithConsumeBroadcast(t bool) OptionUpdatesubGroup {
+	return func(opts *OptionUpdatesubGroupConfig) {
+		opts.ConsumeBroadcastEnable = t
+	}
+}
+
+func WithNamesrvAddr(nameserver string) OptionUpdatesubGroup {
+	return func(opts *OptionUpdatesubGroupConfig) {
+		opts.NamesrvAddr = nameserver
+	}
+}
+
+func WithBrokerAddr(broker string) OptionUpdatesubGroup {
+	return func(opts *OptionUpdatesubGroupConfig) {
+		opts.BrokerAddr = broker
+	}
+}
+
+type OptionConsumerInfo func(config *OptionConsumerInfoConfig)
+
+type OptionConsumerInfoConfig struct {
+	ConsumerGroup string
+	BrokerAddr    string
+}
+
+func defaultOptionConsumerInfo() OptionConsumerInfoConfig {
+	opts := OptionConsumerInfoConfig{}
+	return opts
+}
+
+func WithConsumerGroup(group string) OptionConsumerInfo {
+	return func(opts *OptionConsumerInfoConfig) {
+		opts.ConsumerGroup = group
+	}
+}
+
+func WithConsumerBrokerAddr(broker string) OptionConsumerInfo {
+	return func(opts *OptionConsumerInfoConfig) {
+		opts.BrokerAddr = broker
+	}
+}
+
+type OptionDeleteSubGroup func(*OptionDeleteSubGroupConfig)
+
+type OptionDeleteSubGroupConfig struct {
+	GroupName   string
+	ClusterName string
+	BrokerAddr  string
+}
+
+func defaultDeleteSubGroup() OptionDeleteSubGroupConfig {
+	opts := OptionDeleteSubGroupConfig{}
+	return opts
+}
+
+func WithDeleteSubGroup(group string) OptionDeleteSubGroup {
+	return func(opts *OptionDeleteSubGroupConfig) {
+		opts.GroupName = group
+	}
+}
+
+func WithDeleteCluster(cluster string) OptionDeleteSubGroup {
+	return func(opts *OptionDeleteSubGroupConfig) {
+		opts.ClusterName = cluster
+	}
+}
+
+func WithDeletebrokeraddr(broker string) OptionDeleteSubGroup {
+	return func(opts *OptionDeleteSubGroupConfig) {
+		opts.BrokerAddr = broker
+	}
+}
+
+type OptionConsumerOffset func(*OptionConsumerOffsetConfig)
+
+type OptionConsumerOffsetConfig struct {
+	ConsumerGroup string
+	Topic         string
+	QueueId       int
+}
+
+func defaultConsumerOffset() OptionConsumerOffsetConfig {
+	opts := OptionConsumerOffsetConfig{}
+	return opts
+}
+
+func WithConsumerOffsetGroup(group string) OptionConsumerOffset {
+	return func(opts *OptionConsumerOffsetConfig) {
+		opts.ConsumerGroup = group
+	}
+}
+
+func WithConsumerOffsetTopic(topic string) OptionConsumerOffset {
+	return func(opts *OptionConsumerOffsetConfig) {
+		opts.Topic = topic
+	}
+}
+
+func WithQueId(queid int) OptionConsumerOffset {
+	return func(opts *OptionConsumerOffsetConfig) {
+		opts.QueueId = queid
+	}
+}
+
+type OptionQueryConsumeQueueConfig struct {
+	Topic         string
+	QueueId       string
+	Index         int
+	Count         int
+	ConsumerGroup string
+}
+
+type OptionQueryConsumeQueue func(*OptionQueryConsumeQueueConfig)
+
+func defaultOptionQueryConsumeQueue() OptionQueryConsumeQueueConfig {
+	opts := OptionQueryConsumeQueueConfig{
+		Index:   8,
+		QueueId: "1",
+	}
+	return opts
+}
+
+func WithQueryTopic(topic string) OptionQueryConsumeQueue {
+	return func(opts *OptionQueryConsumeQueueConfig) {
+		opts.Topic = topic
+	}
+}
+
+func WithQueryConsumerGroup(group string) OptionQueryConsumeQueue {
+	return func(opts *OptionQueryConsumeQueueConfig) {
+		opts.ConsumerGroup = group
+	}
 }

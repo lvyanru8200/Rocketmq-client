@@ -24,39 +24,42 @@ import (
 )
 
 const (
-	ReqSendMessage                   = int16(10)
-	ReqPullMessage                   = int16(11)
-	ReqQueryMessage                  = int16(12)
-	ReqQueryConsumerOffset           = int16(14)
-	ReqUpdateConsumerOffset          = int16(15)
-	ReqCreateTopic                   = int16(17)
-	ReqGetBrokerRuntimeInfo          = int16(28)
-	ReqSearchOffsetByTimestamp       = int16(29)
-	ReqGetMaxOffset                  = int16(30)
-	ReqGetMinOffset                  = int16(31)
-	ReqViewMessageByID               = int16(33)
-	ReqHeartBeat                     = int16(34)
-	ReqConsumerSendMsgBack           = int16(36)
-	ReqENDTransaction                = int16(37)
-	ReqGetConsumerListByGroup        = int16(38)
-	ReqLockBatchMQ                   = int16(41)
-	ReqUnlockBatchMQ                 = int16(42)
-	ReqGetRouteInfoByTopic           = int16(105)
-	ReqGetBrokerClusterInfo          = int16(106)
-	ReqSendBatchMessage              = int16(320)
-	ReqCheckTransactionState         = int16(39)
-	ReqNotifyConsumerIdsChanged      = int16(40)
-	ReqGetTopicStatsInfo             = int16(202)
-	ReqWipeWritePermOfBroker         = int16(205)
-	ReqGetAllTopicListFromNameServer = int16(206)
-	ReqGetConsumeStats               = int16(208)
-	ReqDeleteTopicInBroker           = int16(215)
-	ReqDeleteTopicInNameSrv          = int16(216)
-	ReqResetConsuemrOffset           = int16(220)
-	ReqQueryTopicConsumeByWho        = int16(300)
-	ReqGetConsumerRunningInfo        = int16(307)
-	ReqConsumeMessageDirectly        = int16(309)
-	ReqGetBrokerConsumeStats         = int16(317)
+	ReqSendMessage                      = int16(10)
+	ReqPullMessage                      = int16(11)
+	ReqQueryMessage                     = int16(12)
+	ReqQueryConsumerOffset              = int16(14)
+	ReqUpdateConsumerOffset             = int16(15)
+	ReqCreateTopic                      = int16(17)
+	ReqGetBrokerRuntimeInfo             = int16(28)
+	ReqSearchOffsetByTimestamp          = int16(29)
+	ReqGetMaxOffset                     = int16(30)
+	ReqGetMinOffset                     = int16(31)
+	ReqViewMessageByID                  = int16(33)
+	ReqHeartBeat                        = int16(34)
+	ReqConsumerSendMsgBack              = int16(36)
+	ReqENDTransaction                   = int16(37)
+	ReqGetConsumerListByGroup           = int16(38)
+	ReqLockBatchMQ                      = int16(41)
+	ReqUnlockBatchMQ                    = int16(42)
+	ReqGetRouteInfoByTopic              = int16(105)
+	ReqGetBrokerClusterInfo             = int16(106)
+	ReqSendBatchMessage                 = int16(320)
+	ReqCheckTransactionState            = int16(39)
+	ReqNotifyConsumerIdsChanged         = int16(40)
+	ReqUpdateAndCreateSubscriptionGroup = int16(200)
+	ReqGetTopicStatsInfo                = int16(202)
+	ReqWipeWritePermOfBroker            = int16(205)
+	ReqGetAllTopicListFromNameServer    = int16(206)
+	ReqDeleteSubscriptionGroup          = int16(207)
+	ReqGetConsumeStats                  = int16(208)
+	ReqDeleteTopicInBroker              = int16(215)
+	ReqDeleteTopicInNameSrv             = int16(216)
+	ReqResetConsuemrOffset              = int16(220)
+	ReqQueryTopicConsumeByWho           = int16(300)
+	ReqGetConsumerRunningInfo           = int16(307)
+	ReqConsumeMessageDirectly           = int16(309)
+	ReqGetBrokerConsumeStats            = int16(317)
+	ReqQueryConsumeQueue                = int16(321)
 )
 
 type SendMessageRequestHeader struct {
@@ -469,4 +472,90 @@ func (request *QueryTopicConsumeByWhoRequestHeader) Encode() map[string]string {
 
 func (request *QueryTopicConsumeByWhoRequestHeader) Decode() map[string]string {
 	return nil
+}
+
+type UpdateAndCreateSubscriptionGroupRequestHeader struct {
+	BrokerAddr             string
+	ClusterName            string
+	GroupName              string
+	BrokerId               string
+	NamesrvAddr            string
+	RetryQueueNums         int
+	RetryMaxTimes          int64
+	ConsumeEnable          bool
+	ConsumeFromMinEnable   bool
+	ConsumeBroadcastEnable bool
+}
+
+func (request *UpdateAndCreateSubscriptionGroupRequestHeader) Encode() map[string]string {
+	maps := make(map[string]string)
+	maps["brokerAddr"] = request.BrokerAddr
+	maps["clusterName"] = request.ClusterName
+	maps["groupName"] = request.GroupName
+	maps["brokerId"] = request.BrokerId
+	maps["consumeFromMinEnable"] = strconv.FormatBool(request.ConsumeFromMinEnable)
+	maps["consumeBroadcastEnable"] = strconv.FormatBool(request.ConsumeBroadcastEnable)
+	maps["consumeEnable"] = strconv.FormatBool(request.ConsumeEnable)
+	maps["namesrvAddr"] = request.NamesrvAddr
+	return maps
+}
+
+func (request *UpdateAndCreateSubscriptionGroupRequestHeader) Decode() map[string]string {
+	return nil
+}
+
+type UpdateTopicRequestHeader struct {
+	Topic           string
+	ClusterName     string
+	NamesrvAddr     string
+	TopicFilterType string
+}
+
+func (request *UpdateTopicRequestHeader) Encode() map[string]string {
+	maps := make(map[string]string)
+	maps["topic"] = request.Topic
+	maps["clusterName"] = request.ClusterName
+	maps["namesrvAddr"] = request.NamesrvAddr
+	maps["topicFilterType"] = request.TopicFilterType
+	return maps
+}
+
+type GetConsumerRunningInfoRequestHeader struct {
+	ConsumerGroup string
+	ClientId      string
+}
+
+func (request *GetConsumerRunningInfoRequestHeader) Encode() map[string]string {
+	maps := make(map[string]string)
+	maps["consumerGroup"] = request.ConsumerGroup
+	maps["clientId"] = request.ClientId
+	return maps
+}
+
+type DeleteSubscriptionGroupRequestHeader struct {
+	GroupName  string
+	BrokerAddr string
+}
+
+func (request *DeleteSubscriptionGroupRequestHeader) Encode() map[string]string {
+	maps := make(map[string]string)
+	maps["groupName"] = request.GroupName
+	maps["brokerAddr"] = request.BrokerAddr
+	return maps
+}
+
+type QueryConsumeQueueRequestHeader struct {
+	Topic         string
+	ConsumerGroup string
+	QueueId       string
+	Index         int
+}
+
+func (request *QueryConsumeQueueRequestHeader) Encode() map[string]string {
+	maps := make(map[string]string)
+	maps["topic"] = request.Topic
+	maps["consumerGroup"] = request.ConsumerGroup
+	maps["queueId"] = request.QueueId
+	maps["Index"] = strconv.Itoa(request.Index)
+	return maps
 }

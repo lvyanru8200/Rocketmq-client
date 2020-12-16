@@ -18,7 +18,6 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/apache/rocketmq-client-go/v2/admin"
 	"github.com/apache/rocketmq-client-go/v2/primitive"
@@ -48,8 +47,8 @@ func main() {
 	//deletetopic
 	/*	err = testAdmin.DeleteTopic(
 			context.Background(),
-			admin.WithTopicDelete(topic),
-			admin.WithBrokerAddrDelete(brokerAddr),
+			admin.WithTopicDelete("teststatus"),
+			admin.WithBrokerAddrDelete("10.21.7.5:55537"),
 			//admin.WithNameSrvAddr(nameSrvAddr),
 		)
 		if err != nil {
@@ -68,12 +67,24 @@ func main() {
 		)*/
 	/*json,err:=testAdmin.TopicList(context.Background(),admin.WithNameserver("10.21.7.5:30021"))*/
 	/*json,_:=testAdmin.StatsAll(context.Background(),"10.21.7.6:54874","teststatus")*/
-	json, err := testAdmin.QueryTopicConsumeByWho(context.Background(), admin.WithBrokeraddr("10.21.7.6:54874"), admin.WithTopic("teststatus"))
-	fmt.Println(json)
+	/*	json, err := testAdmin.QueryTopicConsumeByWho(context.Background(), admin.WithBrokeraddr("10.21.7.6:54874"), admin.WithTopic("teststatus"))*/
+	/*fmt.Println(json)*/
 	/*	err = testAdmin.WipeWritePerm(context.Background(), "n11", "10.21.7.5:30021")
 		if err != nil {
 			fmt.Println(err)
 		}*/
+	/*testAdmin.UpdateAndCreateSubscriptionGroup(context.Background(),admin.WithGroupName("testGroup"),admin.WithGroupClusterName("raft-1"),
+	admin.WithConsumeFromMin(true),admin.WithConsumeBroadcast(true),admin.WithNamesrvAddr("10.21.7.6:32666"),
+	admin.WithBrokerAddr("10.21.7.7:51554"))*/
+	/*	err =testAdmin.UpdateTopic(context.Background(),admin.WithTopicCreate("testcr"),admin.WithTopicClusterName("raft-1"),admin.WithBrokerAddrCreate("10.21.7.7:51554"),admin.WithTopicFilterType("SINGLE_TAG"))
+		if err!=nil{
+			fmt.Println(err)
+		}*/
+	/*testAdmin.GetConsumerRunningInfo(context.Background(),admin.WithConsumerBrokerAddr("10.21.7.7:51554"),admin.WithConsumerGroup("testGroup"))*/
+	/*off,err:=testAdmin.GetConsumerOffset(context.Background(),admin.WithConsumerOffsetGroup("testGroup"),admin.WithConsumerOffsetTopic("testcr"),admin.WithQueId(1))
+	  fmt.Println(off)
+	*/
+
 	err = testAdmin.Close()
 	if err != nil {
 		fmt.Printf("Shutdown admin error: %s", err.Error())
