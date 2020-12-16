@@ -1,4 +1,6 @@
-module github.com/apache/rocketmq-client-go/v2
+module github.com/lvyanru8200/rocketmq-client-go
+
+go 1.13
 
 require (
 	github.com/bitly/go-simplejson v0.5.0
@@ -20,4 +22,4 @@ require (
 
 replace stathat.com/c/consistent v1.0.0 => github.com/stathat/consistent v1.0.0
 
-go 1.13
+
