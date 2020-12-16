@@ -309,11 +309,18 @@ type OptionConsumerOffsetConfig struct {
 	ConsumerGroup string
 	Topic         string
 	QueueId       int
+	BrokerAddr    string
 }
 
 func defaultConsumerOffset() OptionConsumerOffsetConfig {
 	opts := OptionConsumerOffsetConfig{}
 	return opts
+}
+
+func WithConsumeroffsetBrokerAddr(broker string) OptionConsumerOffset {
+	return func(opts *OptionConsumerOffsetConfig) {
+		opts.BrokerAddr = broker
+	}
 }
 
 func WithConsumerOffsetGroup(group string) OptionConsumerOffset {

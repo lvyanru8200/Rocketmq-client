@@ -430,7 +430,7 @@ func (a *admin) GetConsumerOffset(ctx context.Context, opts ...OptionConsumerOff
 		QueueId:       cfg.QueueId,
 	}
 	cmd := remote.NewRemotingCommand(internal.ReqQueryConsumerOffset, request, nil)
-	output, err := a.cli.InvokeSync(ctx, "10.21.7.6:43213", cmd, 3*time.Second)
+	output, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 3*time.Second)
 	if err != nil {
 		rlog.Error("获得consumeroffset失败", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
