@@ -472,6 +472,28 @@ func (s *namesrvs) routeData2PublishInfo(topic string, data *TopicRouteData) *To
 	return publishInfo
 }
 
+type ConsumeStatsData struct {
+	BrokerAddr       string          `json:"brokerAddr"`
+	ConsumeStatsList []*ConsumeStats `json:"consumeStatsList"`
+	TotalDiff        int64           `json:"totalDiff"`
+}
+
+type ConsumeStats struct {
+	SelfTestCGroup      []string `json:"SELF_TEST_C_GROUP"`
+	CidOnsapiOwner      []string `json:"CID_ONSAPI_OWNER"`
+	CidOnsapiPermission []string `json:"CID_ONSAPI_PERMISSION"`
+	ToolsConsumer       []string `json:"TOOLS_CONSUMER"`
+	TestGroup           []string `json:"testGroup"`
+	CidOnsHttpProxy     []string `json:"CID_ONS-HTTP-PROXY"`
+	FiltErsrvConsumer   []string `json:"FILTERSRV_CONSUMER"`
+	CidOnsapiPull       []string `json:"CID_ONSAPI_PULL"`
+}
+
+/*func (consumeStatsData *ConsumeStatsData) Decode(data string)error{
+	res:=gjson.Parse(data)
+	err := jsoniter.Unmarshal([]byte(res.Get("queueDatas").String()), &consumeStatsData.QueueDataList)
+}*/
+
 // TopicRouteData TopicRouteData
 type TopicRouteData struct {
 	OrderTopicConf string

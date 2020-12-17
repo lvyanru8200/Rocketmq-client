@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bitly/go-simplejson"
+	"github.com/tidwall/gjson"
 	"rocketmq-client-go/internal"
 	"rocketmq-client-go/internal/remote"
 	"rocketmq-client-go/primitive"
@@ -384,7 +385,7 @@ func (a *admin) UpdateTopic(ctx context.Context, opts ...OptionCreate) error {
 	return err
 }
 
-func (a *admin) GetConsumerRunningInfo(ctx context.Context, opts ...OptionConsumerInfo) (*simplejson.Json, error) {
+func (a *admin) GetConsumerRunningInfo(ctx context.Context, opts ...OptionConsumerInfo) (gjson.Result, error) {
 	cfg := defaultOptionConsumerInfo()
 	for _, apply := range opts {
 		apply(&cfg)
@@ -403,8 +404,7 @@ func (a *admin) GetConsumerRunningInfo(ctx context.Context, opts ...OptionConsum
 			rlog.LogKeyBroker: cfg.BrokerAddr,
 		})
 	}
-	fmt.Println(output.String())
-	return nil, err
+	return gjson.Parse(string(output.Body)), err
 }
 
 func (a *admin) DeleteSubscriptionGroup(ctx context.Context, opts ...OptionDeleteSubGroup) error {
@@ -487,7 +487,7 @@ func (a *admin) GetRouteInfo(ctx context.Context, opts ...OptionGetRouteInfo) (*
 	return routeData, nil
 }
 
-func (a *admin) GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsumeStatsInBroker) (string, error) {
+func (a *admin) GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsumeStatsInBroker) (gjson.Result, error) {
 	cfg := defaultOptionConsumeStatsInBroker()
 	for _, apply := range opts {
 		apply(&cfg)
@@ -504,7 +504,7 @@ func (a *admin) GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsu
 	} else {
 		rlog.Info("获得ConsumeStats成功", map[string]interface{}{})
 	}
-	return string(output.Body), nil
+	return gjson.Parse(string(output.Body)), err
 }
 
 func (a *admin) Close() error {
