@@ -35,7 +35,7 @@ type Admin interface {
 	CreateTopic(ctx context.Context, opts ...OptionCreate) error
 	DeleteTopic(ctx context.Context, opts ...OptionDelete) error
 	//TODO
-	TopicList(ctx context.Context, opts ...OptionTopicList) (*simplejson.Json, error)
+	GetTopicsByCluster(ctx context.Context, opts ...OptionTopicList) (*simplejson.Json, error)
 	GetBrokerRuntimeInfo(ctx context.Context, nameserver string, broker string) (*simplejson.Json, error)
 	GetConsumeStats(ctx context.Context, broker string) (*simplejson.Json, error)
 	WipeWritePerm(ctx context.Context, opts ...OptionWipeWritePerm) error
@@ -205,15 +205,15 @@ func (a *admin) DeleteTopic(ctx context.Context, opts ...OptionDelete) error {
 	return nil
 }
 
-func (a *admin) TopicList(ctx context.Context, opts ...OptionTopicList) (*simplejson.Json, error) {
+func (a *admin) GetTopicsByCluster(ctx context.Context, opts ...OptionTopicList) (*simplejson.Json, error) {
 	cfg := defaultTopicList()
 	for _, apply := range opts {
 		apply(&cfg)
 	}
-	request := &internal.TopicListRequestHeader{
-		Nameserver: cfg.Nameserver,
+	request := &internal.GetTopicsByClusterRequestHeader{
+		Cluster: cfg.Cluster,
 	}
-	cmd := remote.NewRemotingCommand(internal.ReqGetAllTopicListFromNameServer, request, nil)
+	cmd := remote.NewRemotingCommand(internal.GetTopicsByCluster, request, nil)
 	opout, err := a.cli.InvokeSync(ctx, cfg.Nameserver, cmd, 5*time.Second)
 	if err != nil {
 		rlog.Error("获取topic列表失败", map[string]interface{}{

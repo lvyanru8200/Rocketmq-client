@@ -142,15 +142,28 @@ func WithNameSrvAddr(NameSrvAddr []string) OptionDelete {
 	}
 }
 
-type OptionTopicList func(*TopicListConfig)
+type OptionTopicList func(*OptionTopicListConfig)
 
-type TopicListConfig struct {
+type OptionTopicListConfig struct {
+	Cluster    string
 	Nameserver string
 }
 
-func defaultTopicList() TopicListConfig {
-	opts := TopicListConfig{}
+func defaultTopicList() OptionTopicListConfig {
+	opts := OptionTopicListConfig{}
 	return opts
+}
+
+func WithClusterTopicList(cluster string) OptionTopicList {
+	return func(opts *OptionTopicListConfig) {
+		opts.Cluster = cluster
+	}
+}
+
+func WithNameserver(nameserver string) OptionTopicList {
+	return func(opts *OptionTopicListConfig) {
+		opts.Nameserver = nameserver
+	}
 }
 
 type OptionQueryTopicConsume func(config *QueryTopicConsumeConfig)
@@ -173,12 +186,6 @@ func WithBrokeraddr(broker string) OptionQueryTopicConsume {
 func WithTopic(topic string) OptionQueryTopicConsume {
 	return func(opts *QueryTopicConsumeConfig) {
 		opts.Topic = topic
-	}
-}
-
-func WithNameserver(nameserver string) OptionTopicList {
-	return func(opts *TopicListConfig) {
-		opts.Nameserver = nameserver
 	}
 }
 

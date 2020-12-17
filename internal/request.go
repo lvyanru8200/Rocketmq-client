@@ -55,6 +55,7 @@ const (
 	ReqDeleteTopicInBroker              = int16(215)
 	ReqDeleteTopicInNameSrv             = int16(216)
 	ReqResetConsuemrOffset              = int16(220)
+	GetTopicsByCluster                  = int16(224)
 	ReqQueryTopicConsumeByWho           = int16(300)
 	ReqGetConsumerRunningInfo           = int16(307)
 	ReqConsumeMessageDirectly           = int16(309)
@@ -395,17 +396,17 @@ func (request *CreateTopicRequestHeader) Encode() map[string]string {
 	return maps
 }
 
-type TopicListRequestHeader struct {
-	Nameserver string
+type GetTopicsByClusterRequestHeader struct {
+	Cluster string
 }
 
-func (request *TopicListRequestHeader) Encode() map[string]string {
+func (request *GetTopicsByClusterRequestHeader) Encode() map[string]string {
 	maps := make(map[string]string)
-	maps["nameserver"] = request.Nameserver
+	maps["cluster"] = request.Cluster
 	return maps
 }
 
-func (request *TopicListRequestHeader) Decode() map[string]string {
+func (request *GetTopicsByClusterRequestHeader) Decode() map[string]string {
 	return nil
 }
 
