@@ -21,7 +21,8 @@ func main() {
 	json1, _ := testAdmin.GetRouteInfo(context.Background(), admin.WithNamesrvAddrRoute("10.21.7.6:32666"), admin.WithTopicRoute("testcr"))
 	//json,_:=testAdmin.GetConsumeStats(context.Background(),admin.WithConsumerGroupGetConsume("testGroup"),admin.WithTopicGroupGetConsume("testcr"),admin.WithBrokerAddrGetConsume("10.21.7.5:47505"))
 	json2, _ := testAdmin.GetConsumeStatsInBroker(context.Background(), admin.WithConsumerStatsInIsOrder(true), admin.WithConsumeStatsInBrokerBroker("10.21.7.6:54199"))
-
+	p := json2.Get("totalDiff").Int()
+	fmt.Println(p)
 	//p:=json.Get("groupList").MustStringArray()
 	fmt.Println(json1)
 	fmt.Println(json2)
