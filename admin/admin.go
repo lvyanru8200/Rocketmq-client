@@ -43,11 +43,11 @@ type Admin interface {
 	QueryTopicConsumeByWho(ctx context.Context, opts ...OptionQueryTopicConsume) (*simplejson.Json, error)
 	UpdateAndCreateSubscriptionGroup(ctx context.Context, opts ...OptionUpdatesubGroup) error
 	UpdateTopic(ctx context.Context, opts ...OptionCreate) error
-	GetConsumerRunningInfo(ctx context.Context, opts ...OptionConsumerInfo) (*simplejson.Json, error)
+	GetConsumerRunningInfo(ctx context.Context, opts ...OptionConsumerInfo) (gjson.Result, error)
 	DeleteSubscriptionGroup(ctx context.Context, opts ...OptionDeleteSubGroup) error
 	GetConsumerOffset(ctx context.Context, opts ...OptionConsumerOffset) (int64, error)
 	GetRouteInfo(ctx context.Context, opts ...OptionGetRouteInfo) (*internal.TopicRouteData, error)
-	GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsumeStatsInBroker) (string, error)
+	GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsumeStatsInBroker) (gjson.Result, error)
 	Close() error
 }
 
