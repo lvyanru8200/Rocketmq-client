@@ -1,20 +1,20 @@
 ## RocketMQ Client Go 
-[![TravisCI](https://travis-ci.org/apache/rocketmq-client-go.svg)](https://travis-ci.org/apache/rocketmq-client-go) 
+[![TravisCI](https://travis-ci.org/apache/rocketmq-client.svg)](https://travis-ci.org/apache/rocketmq-client) 
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![Go Report Card](https://goreportcard.com/badge/github.com/apache/rocketmq-client-go)](https://goreportcard.com/report/github.com/apache/rocketmq-client-go)
-[![GoDoc](https://img.shields.io/badge/Godoc-reference-blue.svg)](https://godoc.org/github.com/apache/rocketmq-client-go)
-[![CodeCov](https://codecov.io/gh/apache/rocketmq-client-go/branch/master/graph/badge.svg)](https://codecov.io/gh/apache/rocketmq-client-go)
-[![GitHub release](https://img.shields.io/badge/release-download-default.svg)](https://github.com/apache/rocketmq-client-go/releases)
-[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/apache/rocketmq-client-go.svg)](http://isitmaintained.com/project/apache/rocketmq-client-go "Average time to resolve an issue")
-[![Percentage of issues still open](http://isitmaintained.com/badge/open/apache/rocketmq-client-go.svg)](http://isitmaintained.com/project/apache/rocketmq-client-go "Percentage of issues still open")
+[![Go Report Card](https://goreportcard.com/badge/github.com/apache/rocketmq-client)](https://goreportcard.com/report/github.com/apache/rocketmq-client)
+[![GoDoc](https://img.shields.io/badge/Godoc-reference-blue.svg)](https://godoc.org/github.com/apache/rocketmq-client)
+[![CodeCov](https://codecov.io/gh/apache/rocketmq-client/branch/master/graph/badge.svg)](https://codecov.io/gh/apache/rocketmq-client)
+[![GitHub release](https://img.shields.io/badge/release-download-default.svg)](https://github.com/apache/rocketmq-client/releases)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/apache/rocketmq-client.svg)](http://isitmaintained.com/project/apache/rocketmq-client "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/apache/rocketmq-client.svg)](http://isitmaintained.com/project/apache/rocketmq-client "Percentage of issues still open")
 ![Twitter Follow](https://img.shields.io/twitter/follow/ApacheRocketMQ?style=social)
 
 A product ready RocketMQ Client in pure go, which supports almost the full features of Apache RocketMQ, such as pub and sub messages, ACL, tracing and so on.
 
 ----------
-## [Due Diligence](https://github.com/apache/rocketmq-client-go/issues/423)
-[Here](https://github.com/apache/rocketmq-client-go/issues/423), we sincerely invite you to take a minute to feedback on your usage scenario. 
-[Click Here](https://github.com/apache/rocketmq-client-go/issues/423) or go to [ISSUE #423](https://github.com/apache/rocketmq-client-go/issues/423) if you accept.
+## [Due Diligence](https://github.com/apache/rocketmq-client/issues/423)
+[Here](https://github.com/apache/rocketmq-client/issues/423), we sincerely invite you to take a minute to feedback on your usage scenario. 
+[Click Here](https://github.com/apache/rocketmq-client/issues/423) or go to [ISSUE #423](https://github.com/apache/rocketmq-client/issues/423) if you accept.
 
 ----------
 ## Features
@@ -41,7 +41,7 @@ For 2.0.0 version, it supports:
 * Mailing Lists: <https://rocketmq.apache.org/about/contact/>
 * Home: <https://rocketmq.apache.org>
 * Docs: <https://rocketmq.apache.org/docs/quick-start/>
-* Issues: <https://github.com/apache/rocketmq-client-go/issues>
+* Issues: <https://github.com/apache/rocketmq-client/issues>
 * Ask: <https://stackoverflow.com/questions/tagged/rocketmq>
 * Slack: <https://rocketmq-community.slack.com/>
  

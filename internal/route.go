@@ -31,10 +31,10 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/tidwall/gjson"
 
-	"github.com/lvyanru8200/rocketmq-client-go/internal/remote"
-	"github.com/lvyanru8200/rocketmq-client-go/internal/utils"
-	"github.com/lvyanru8200/rocketmq-client-go/primitive"
-	"github.com/lvyanru8200/rocketmq-client-go/rlog"
+	"github.com/lvyanru8200/rocketmq-client/internal/remote"
+	"github.com/lvyanru8200/rocketmq-client/internal/utils"
+	"github.com/lvyanru8200/rocketmq-client/primitive"
+	"github.com/lvyanru8200/rocketmq-client/rlog"
 )
 
 const (

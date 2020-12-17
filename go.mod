@@ -1,4 +1,4 @@
-module github.com/lvyanru8200/rocketmq-client-go
+module github.com/lvyanru8200/rocketmq-client
 
 go 1.14
 

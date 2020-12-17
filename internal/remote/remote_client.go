@@ -25,9 +25,9 @@ import (
 	"net"
 	"sync"
 
-	"github.com/lvyanru8200/rocketmq-client-go/primitive"
+	"github.com/lvyanru8200/rocketmq-client/primitive"
 
-	"github.com/lvyanru8200/rocketmq-client-go/rlog"
+	"github.com/lvyanru8200/rocketmq-client/rlog"
 )
 
 type ClientRequestFunc func(*RemotingCommand, net.Addr) *RemotingCommand
@@ -36,7 +36,7 @@ type TcpOption struct {
 	// TODO
 }
 
-//go:generate mockgen -source remote_client.go -destination mock_remote_client.go -self_package rocketmq-client-go/internal/remote  --package remote RemotingClient
+//go:generate mockgen -source remote_client.go -destination mock_remote_client.go -self_package rocketmq-client/internal/remote  --package remote RemotingClient
 type RemotingClient interface {
 	RegisterRequestFunc(code int16, f ClientRequestFunc)
 	RegisterInterceptor(interceptors ...primitive.Interceptor)
@@ -202,7 +202,7 @@ func (c *remotingClient) processCMD(cmd *RemotingCommand, r *tcpConnWrapper) {
 		f := c.processors[cmd.Code]
 		if f != nil {
 			// single goroutine will be deadlock
-			// TODO: optimize with goroutine pool, https://github.com/apache/rocketmq-client-go/v2/issues/307
+			// TODO: optimize with goroutine pool, https://github.com/apache/rocketmq-client/v2/issues/307
 			go primitive.WithRecover(func() {
 				res := f(cmd, r.RemoteAddr())
 				if res != nil {

@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/lvyanru8200/rocketmq-client-go/admin"
-	"github.com/lvyanru8200/rocketmq-client-go/primitive"
+	"github.com/lvyanru8200/rocketmq-client/admin"
+	"github.com/lvyanru8200/rocketmq-client/primitive"
 )
 
 func main() {

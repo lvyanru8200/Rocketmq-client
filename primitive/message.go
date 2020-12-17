@@ -28,7 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lvyanru8200/rocketmq-client-go/internal/utils"
+	"github.com/lvyanru8200/rocketmq-client/internal/utils"
 )
 
 const (
