@@ -23,8 +23,8 @@ import (
 	"strings"
 	"sync"
 
-	"rocketmq-client-go/internal/remote"
-	"rocketmq-client-go/primitive"
+	"github.com/lvyanru8200/rocketmq-client-go/internal/remote"
+	"github.com/lvyanru8200/rocketmq-client-go/primitive"
 )
 
 const (

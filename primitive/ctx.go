@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"math"
 
-	"rocketmq-client-go/rlog"
+	"github.com/lvyanru8200/rocketmq-client-go/rlog"
 )
 
 type CtxKey int

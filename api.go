@@ -22,9 +22,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	"rocketmq-client-go/consumer"
-	"rocketmq-client-go/primitive"
-	"rocketmq-client-go/producer"
+	"github.com/lvyanru8200/rocketmq-client-go/consumer"
+	"github.com/lvyanru8200/rocketmq-client-go/primitive"
+	"github.com/lvyanru8200/rocketmq-client-go/producer"
 )
 
 type Producer interface {

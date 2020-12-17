@@ -25,9 +25,9 @@ import (
 	"net"
 	"sync"
 
-	"rocketmq-client-go/primitive"
+	"github.com/lvyanru8200/rocketmq-client-go/primitive"
 
-	"rocketmq-client-go/rlog"
+	"github.com/lvyanru8200/rocketmq-client-go/rlog"
 )
 
 type ClientRequestFunc func(*RemotingCommand, net.Addr) *RemotingCommand
