@@ -438,12 +438,14 @@ func (request *DeleteTopicRequestHeader) Encode() map[string]string {
 }
 
 type BrokerConsumeStatRequestHeader struct {
-	Brokeraddr string
+	ConsumerGroup string
+	Topic         string
 }
 
 func (request *BrokerConsumeStatRequestHeader) Encode() map[string]string {
 	maps := make(map[string]string)
-	maps["brokerAddr"] = request.Brokeraddr
+	maps["consumerGroup"] = request.ConsumerGroup
+	maps["topic"] = request.Topic
 	return maps
 }
 
@@ -558,5 +560,15 @@ func (request *QueryConsumeQueueRequestHeader) Encode() map[string]string {
 	maps["consumerGroup"] = request.ConsumerGroup
 	maps["queueId"] = request.QueueId
 	maps["Index"] = strconv.Itoa(request.Index)
+	return maps
+}
+
+type GetConsumeStatsInBrokerHeader struct {
+	IsOrder bool
+}
+
+func (request *GetConsumeStatsInBrokerHeader) Encode() map[string]string {
+	maps := make(map[string]string)
+	maps["isOrder"] = fmt.Sprintf("%b", request.IsOrder)
 	return maps
 }

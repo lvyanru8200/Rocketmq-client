@@ -37,7 +37,7 @@ type Admin interface {
 	//TODO
 	GetTopicsByCluster(ctx context.Context, opts ...OptionTopicList) (*simplejson.Json, error)
 	GetBrokerRuntimeInfo(ctx context.Context, nameserver string, broker string) (*simplejson.Json, error)
-	GetConsumeStats(ctx context.Context, broker string) (*simplejson.Json, error)
+	GetConsumeStats(ctx context.Context, opts ...OptionGetConsumeStats) (*simplejson.Json, error)
 	WipeWritePerm(ctx context.Context, opts ...OptionWipeWritePerm) error
 	QueryTopicConsumeByWho(ctx context.Context, opts ...OptionQueryTopicConsume) (*simplejson.Json, error)
 	UpdateAndCreateSubscriptionGroup(ctx context.Context, opts ...OptionUpdatesubGroup) error
@@ -46,6 +46,7 @@ type Admin interface {
 	DeleteSubscriptionGroup(ctx context.Context, opts ...OptionDeleteSubGroup) error
 	GetConsumerOffset(ctx context.Context, opts ...OptionConsumerOffset) (int64, error)
 	GetRouteInfo(ctx context.Context, opts ...OptionGetRouteInfo) (*internal.TopicRouteData, error)
+	GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsumeStatsInBroker) (string, error)
 	Close() error
 }
 
@@ -251,12 +252,17 @@ func (a *admin) GetBrokerRuntimeInfo(ctx context.Context, nameserver string, bro
 	return json, nil
 }
 
-func (a *admin) GetConsumeStats(ctx context.Context, broker string) (*simplejson.Json, error) {
-	request := &internal.BrokerConsumeStatRequestHeader{
-		Brokeraddr: broker,
+func (a *admin) GetConsumeStats(ctx context.Context, opts ...OptionGetConsumeStats) (*simplejson.Json, error) {
+	cfg := defaultOptionGetConsumeStats()
+	for _, apply := range opts {
+		apply(&cfg)
 	}
-	cmd := remote.NewRemotingCommand(internal.ReqGetBrokerConsumeStats, request, nil)
-	output, err := a.cli.InvokeSync(ctx, broker, cmd, 5*time.Second)
+	request := &internal.BrokerConsumeStatRequestHeader{
+		ConsumerGroup: cfg.ConsumerGroup,
+		Topic:         cfg.Topic,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqGetConsumeStats, request, nil)
+	output, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
 	if err != nil {
 		rlog.Error("获取ConsumeStats失败", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
@@ -264,9 +270,10 @@ func (a *admin) GetConsumeStats(ctx context.Context, broker string) (*simplejson
 	} else {
 		rlog.Info("获取ConsumeStats成功", map[string]interface{}{})
 	}
+	fmt.Println(string(output.Body))
 	json, err := simplejson.NewJson(output.Body)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
 	}
 	return json, nil
 }
@@ -463,13 +470,12 @@ func (a *admin) GetRouteInfo(ctx context.Context, opts ...OptionGetRouteInfo) (*
 	cmd := remote.NewRemotingCommand(internal.ReqGetRouteInfoByTopic, request, nil)
 	output, err := a.cli.InvokeSync(ctx, cfg.NamesrvAddr, cmd, 3*time.Second)
 	if err != nil {
-		rlog.Error("获得consumeroffset失败", map[string]interface{}{
+		rlog.Error("获得topicRoute失败", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("获得consumeroffset成功", map[string]interface{}{})
+		rlog.Info("获得topicRoute成功", map[string]interface{}{})
 	}
-	fmt.Println(string(output.Body))
 	routeData := &internal.TopicRouteData{}
 	err = routeData.Decode(string(output.Body))
 	if err != nil {
@@ -480,6 +486,27 @@ func (a *admin) GetRouteInfo(ctx context.Context, opts ...OptionGetRouteInfo) (*
 	}
 	return routeData, nil
 }
+
+func (a *admin) GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsumeStatsInBroker) (string, error) {
+	cfg := defaultOptionConsumeStatsInBroker()
+	for _, apply := range opts {
+		apply(&cfg)
+	}
+	request := &internal.GetConsumeStatsInBrokerHeader{
+		IsOrder: cfg.IsOrder,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqGetBrokerConsumeStats, request, nil)
+	output, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 3*time.Second)
+	if err != nil {
+		rlog.Error("获得ConsumeStats失败", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("获得ConsumeStats成功", map[string]interface{}{})
+	}
+	return string(output.Body), nil
+}
+
 func (a *admin) Close() error {
 	a.closeOnce.Do(func() {
 		a.cli.Shutdown()

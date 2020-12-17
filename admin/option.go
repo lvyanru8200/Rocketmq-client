@@ -425,3 +425,58 @@ func WithNamesrvAddrRoute(nameserver string) OptionGetRouteInfo {
 		opts.NamesrvAddr = nameserver
 	}
 }
+
+type OptionGetConsumeStatsConfig struct {
+	ConsumerGroup string
+	Topic         string
+	BrokerAddr    string
+}
+
+type OptionGetConsumeStats func(*OptionGetConsumeStatsConfig)
+
+func defaultOptionGetConsumeStats() OptionGetConsumeStatsConfig {
+	opts := OptionGetConsumeStatsConfig{}
+	return opts
+}
+
+func WithBrokerAddrGetConsume(broker string) OptionGetConsumeStats {
+	return func(opts *OptionGetConsumeStatsConfig) {
+		opts.BrokerAddr = broker
+	}
+}
+
+func WithConsumerGroupGetConsume(group string) OptionGetConsumeStats {
+	return func(opts *OptionGetConsumeStatsConfig) {
+		opts.ConsumerGroup = group
+	}
+}
+
+func WithTopicGroupGetConsume(topic string) OptionGetConsumeStats {
+	return func(opts *OptionGetConsumeStatsConfig) {
+		opts.Topic = topic
+	}
+}
+
+type OptionConsumeStatsInBrokerConfig struct {
+	IsOrder    bool
+	BrokerAddr string
+}
+
+type OptionConsumeStatsInBroker func(config *OptionConsumeStatsInBrokerConfig)
+
+func defaultOptionConsumeStatsInBroker() OptionConsumeStatsInBrokerConfig {
+	opts := OptionConsumeStatsInBrokerConfig{}
+	return opts
+}
+
+func WithConsumeStatsInBrokerBroker(broker string) OptionConsumeStatsInBroker {
+	return func(opts *OptionConsumeStatsInBrokerConfig) {
+		opts.BrokerAddr = broker
+	}
+}
+
+func WithConsumerStatsInIsOrder(b bool) OptionConsumeStatsInBroker {
+	return func(opts *OptionConsumeStatsInBrokerConfig) {
+		opts.IsOrder = b
+	}
+}
