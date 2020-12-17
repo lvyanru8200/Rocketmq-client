@@ -45,6 +45,7 @@ type Admin interface {
 	GetConsumerRunningInfo(ctx context.Context, opts ...OptionConsumerInfo) (*simplejson.Json, error)
 	DeleteSubscriptionGroup(ctx context.Context, opts ...OptionDeleteSubGroup) error
 	GetConsumerOffset(ctx context.Context, opts ...OptionConsumerOffset) (int64, error)
+	GetRouteInfo(ctx context.Context, opts ...OptionGetRouteInfo) (*internal.TopicRouteData, error)
 	Close() error
 }
 
@@ -451,6 +452,34 @@ func (a *admin) GetConsumerOffset(ctx context.Context, opts ...OptionConsumerOff
 	return off, nil
 }
 
+func (a *admin) GetRouteInfo(ctx context.Context, opts ...OptionGetRouteInfo) (*internal.TopicRouteData, error) {
+	cfg := defaultOptionGetRouteInfo()
+	for _, apply := range opts {
+		apply(&cfg)
+	}
+	request := &internal.GetRouteInfoRequestHeader{
+		Topic: cfg.Topic,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqGetRouteInfoByTopic, request, nil)
+	output, err := a.cli.InvokeSync(ctx, cfg.NamesrvAddr, cmd, 3*time.Second)
+	if err != nil {
+		rlog.Error("获得consumeroffset失败", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("获得consumeroffset成功", map[string]interface{}{})
+	}
+	fmt.Println(string(output.Body))
+	routeData := &internal.TopicRouteData{}
+	err = routeData.Decode(string(output.Body))
+	if err != nil {
+		rlog.Warning("decode TopicRouteData error: %s", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+			"topic":                  cfg.Topic,
+		})
+	}
+	return routeData, nil
+}
 func (a *admin) Close() error {
 	a.closeOnce.Do(func() {
 		a.cli.Shutdown()

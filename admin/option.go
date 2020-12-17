@@ -401,3 +401,27 @@ func WithWipeWritePermNamesvr(nameserver string) OptionWipeWritePerm {
 		opts.NamesrvAddr = nameserver
 	}
 }
+
+type OptionGetRouteInfoConfig struct {
+	Topic       string
+	NamesrvAddr string
+}
+
+type OptionGetRouteInfo func(*OptionGetRouteInfoConfig)
+
+func defaultOptionGetRouteInfo() OptionGetRouteInfoConfig {
+	opts := OptionGetRouteInfoConfig{}
+	return opts
+}
+
+func WithTopicRoute(topic string) OptionGetRouteInfo {
+	return func(opts *OptionGetRouteInfoConfig) {
+		opts.Topic = topic
+	}
+}
+
+func WithNamesrvAddrRoute(nameserver string) OptionGetRouteInfo {
+	return func(opts *OptionGetRouteInfoConfig) {
+		opts.NamesrvAddr = nameserver
+	}
+}
