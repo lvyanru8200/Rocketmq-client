@@ -38,7 +38,7 @@ type Admin interface {
 	TopicList(ctx context.Context, opts ...OptionTopicList) (*simplejson.Json, error)
 	GetBrokerRuntimeInfo(ctx context.Context, nameserver string, broker string) (*simplejson.Json, error)
 	GetConsumeStats(ctx context.Context, broker string) (*simplejson.Json, error)
-	WipeWritePerm(ctx context.Context, brokername string, nameserver string) error
+	WipeWritePerm(ctx context.Context, opts ...OptionWipeWritePerm) error
 	QueryTopicConsumeByWho(ctx context.Context, opts ...OptionQueryTopicConsume) (*simplejson.Json, error)
 	UpdateAndCreateSubscriptionGroup(ctx context.Context, opts ...OptionUpdatesubGroup) error
 	UpdateTopic(ctx context.Context, opts ...OptionCreate) error
@@ -215,7 +215,6 @@ func (a *admin) TopicList(ctx context.Context, opts ...OptionTopicList) (*simple
 	}
 	cmd := remote.NewRemotingCommand(internal.ReqGetAllTopicListFromNameServer, request, nil)
 	opout, err := a.cli.InvokeSync(ctx, cfg.Nameserver, cmd, 5*time.Second)
-	fmt.Println(string(opout.Body))
 	if err != nil {
 		rlog.Error("获取topic列表失败", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
@@ -271,13 +270,17 @@ func (a *admin) GetConsumeStats(ctx context.Context, broker string) (*simplejson
 	return json, nil
 }
 
-func (a *admin) WipeWritePerm(ctx context.Context, brokername string, nameserver string) error {
+func (a *admin) WipeWritePerm(ctx context.Context, opts ...OptionWipeWritePerm) error {
+	cfg := defaultOptionWipeWritePerm()
+	for _, apply := range opts {
+		apply(&cfg)
+	}
 	request := &internal.WipeWritePermOfBrokerRequestHeader{
-		Brokername: brokername,
-		Nameserver: nameserver,
+		Brokername: cfg.BrokerName,
+		Nameserver: cfg.NamesrvAddr,
 	}
 	cmd := remote.NewRemotingCommand(internal.ReqWipeWritePermOfBroker, request, nil)
-	_, err := a.cli.InvokeSync(ctx, nameserver, cmd, 5*time.Second)
+	_, err := a.cli.InvokeSync(ctx, cfg.NamesrvAddr, cmd, 5*time.Second)
 	if err != nil {
 		rlog.Error("禁止写失败", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,

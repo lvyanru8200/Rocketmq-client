@@ -416,8 +416,8 @@ type ClusterListRequestHeader struct {
 
 func (request *ClusterListRequestHeader) Encode() map[string]string {
 	maps := make(map[string]string)
-	maps["namesvraddr"] = request.NamesvrAddr
-	maps["brokeraddr"] = request.BrokerAddr
+	maps["namesvrAddr"] = request.NamesvrAddr
+	maps["brokerAddr"] = request.BrokerAddr
 	return maps
 }
 
@@ -442,7 +442,7 @@ type BrokerConsumeStatRequestHeader struct {
 
 func (request *BrokerConsumeStatRequestHeader) Encode() map[string]string {
 	maps := make(map[string]string)
-	maps["brokeraddr"] = request.Brokeraddr
+	maps["brokerAddr"] = request.Brokeraddr
 	return maps
 }
 

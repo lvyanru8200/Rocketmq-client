@@ -370,3 +370,27 @@ func WithQueryConsumerGroup(group string) OptionQueryConsumeQueue {
 		opts.ConsumerGroup = group
 	}
 }
+
+type OptionWipeWritePermConfig struct {
+	BrokerName  string
+	NamesrvAddr string
+}
+
+type OptionWipeWritePerm func(*OptionWipeWritePermConfig)
+
+func defaultOptionWipeWritePerm() OptionWipeWritePermConfig {
+	opts := OptionWipeWritePermConfig{}
+	return opts
+}
+
+func WithBrokerName(brokername string) OptionWipeWritePerm {
+	return func(opts *OptionWipeWritePermConfig) {
+		opts.BrokerName = brokername
+	}
+}
+
+func WithWipeWritePermNamesvr(nameserver string) OptionWipeWritePerm {
+	return func(opts *OptionWipeWritePermConfig) {
+		opts.NamesrvAddr = nameserver
+	}
+}
