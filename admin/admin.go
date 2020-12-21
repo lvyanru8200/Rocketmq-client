@@ -49,6 +49,7 @@ type Admin interface {
 	GetRouteInfo(ctx context.Context, opts ...OptionGetRouteInfo) (*internal.TopicRouteData, error)
 	GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsumeStatsInBroker) (gjson.Result, error)
 	GetBrokerClusterInfo(ctx context.Context, nameserver string) (gjson.Result, error)
+	UpdateConsumerOffset(ctx context.Context, opts ...OptionUpdateConsumerOffset) error
 	Close() error
 }
 
@@ -516,6 +517,29 @@ func (a *admin) GetBrokerClusterInfo(ctx context.Context, nameserver string) (gj
 		rlog.Info("Successful Get BrokerClusterInfo", map[string]interface{}{})
 	}
 	return gjson.Parse(string(output.Body)), err
+}
+
+func (a *admin) UpdateConsumerOffset(ctx context.Context, opts ...OptionUpdateConsumerOffset) error {
+	cfg := defaultOptionUpdateConsumerOffset()
+	for _, apply := range opts {
+		apply(&cfg)
+	}
+	request := &internal.UpdateConsumerOffsetRequestHeader{
+		ConsumerGroup: cfg.ConsumerGroup,
+		Topic:         cfg.Topic,
+		CommitOffset:  cfg.CommitOffset,
+		QueueId:       cfg.QueueId,
+	}
+	cmd := remote.NewRemotingCommand(internal.ReqUpdateConsumerOffset, request, nil)
+	_, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 3*time.Second)
+	if err != nil {
+		rlog.Error("Fail  Update ConsumerOffset", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("Successful Update ConsumerOffset", map[string]interface{}{})
+	}
+	return err
 }
 
 func (a *admin) Close() error {

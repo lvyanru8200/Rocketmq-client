@@ -480,3 +480,47 @@ func WithConsumerStatsInIsOrder(b bool) OptionConsumeStatsInBroker {
 		opts.IsOrder = b
 	}
 }
+
+type OptionUpdateConsumerOffsetConfig struct {
+	ConsumerGroup string
+	Topic         string
+	QueueId       int
+	CommitOffset  int64
+	BrokerAddr    string
+}
+
+type OptionUpdateConsumerOffset func(config *OptionUpdateConsumerOffsetConfig)
+
+func defaultOptionUpdateConsumerOffset() OptionUpdateConsumerOffsetConfig {
+	opts := OptionUpdateConsumerOffsetConfig{}
+	return opts
+}
+
+func WithUpdateoffsetConsumerGroup(group string) OptionUpdateConsumerOffset {
+	return func(opts *OptionUpdateConsumerOffsetConfig) {
+		opts.ConsumerGroup = group
+	}
+}
+
+func WithUpdateoffsetTopic(topic string) OptionUpdateConsumerOffset {
+	return func(opts *OptionUpdateConsumerOffsetConfig) {
+		opts.Topic = topic
+	}
+}
+
+func WithUpdateoffsetQueueId(queueid int) OptionUpdateConsumerOffset {
+	return func(opts *OptionUpdateConsumerOffsetConfig) {
+		opts.QueueId = queueid
+	}
+}
+
+func WithUpdateoffsetCommitoffset(commitoffset int64) OptionUpdateConsumerOffset {
+	return func(opts *OptionUpdateConsumerOffsetConfig) {
+		opts.CommitOffset = commitoffset
+	}
+}
+func WithUpdateoffsetBrokerAddr(broker string) OptionUpdateConsumerOffset {
+	return func(opts *OptionUpdateConsumerOffsetConfig) {
+		opts.BrokerAddr = broker
+	}
+}
