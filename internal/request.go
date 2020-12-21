@@ -482,12 +482,12 @@ type UpdateAndCreateSubscriptionGroupRequestHeader struct {
 	ClusterName            string
 	GroupName              string
 	BrokerId               string
-	NamesrvAddr            string
 	RetryQueueNums         int
 	RetryMaxTimes          int64
 	ConsumeEnable          bool
 	ConsumeFromMinEnable   bool
 	ConsumeBroadcastEnable bool
+	NamesrvAddr            string
 }
 
 func (request *UpdateAndCreateSubscriptionGroupRequestHeader) Encode() map[string]string {
@@ -570,5 +570,13 @@ type GetConsumeStatsInBrokerHeader struct {
 func (request *GetConsumeStatsInBrokerHeader) Encode() map[string]string {
 	maps := make(map[string]string)
 	maps["isOrder"] = fmt.Sprintf("%b", request.IsOrder)
+	return maps
+}
+
+type GetBrokerClsuterInfoRequetsHeader struct {
+}
+
+func (request *GetBrokerClsuterInfoRequetsHeader) Encode() map[string]string {
+	maps := make(map[string]string)
 	return maps
 }

@@ -48,6 +48,7 @@ type Admin interface {
 	GetConsumerOffset(ctx context.Context, opts ...OptionConsumerOffset) (int64, error)
 	GetRouteInfo(ctx context.Context, opts ...OptionGetRouteInfo) (*internal.TopicRouteData, error)
 	GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsumeStatsInBroker) (gjson.Result, error)
+	GetBrokerClusterInfo(ctx context.Context, nameserver string) (gjson.Result, error)
 	Close() error
 }
 
@@ -338,15 +339,10 @@ func (a *admin) UpdateAndCreateSubscriptionGroup(ctx context.Context, opts ...Op
 		apply(&cfg)
 	}
 	request := &internal.UpdateAndCreateSubscriptionGroupRequestHeader{
-		GroupName:              cfg.GroupName,
-		ClusterName:            cfg.ClusterName,
-		ConsumeFromMinEnable:   cfg.ConsumeFromMinEnable,
-		ConsumeBroadcastEnable: cfg.ConsumeBroadcastEnable,
-		NamesrvAddr:            cfg.NamesrvAddr,
-		BrokerAddr:             cfg.BrokerAddr,
+		GroupName: cfg.GroupName,
 	}
 	cmd := remote.NewRemotingCommand(internal.ReqUpdateAndCreateSubscriptionGroup, request, nil)
-	_, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
+	output, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
 	if err != nil {
 		rlog.Error("迁移消费组失败", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
@@ -356,6 +352,7 @@ func (a *admin) UpdateAndCreateSubscriptionGroup(ctx context.Context, opts ...Op
 			rlog.LogKeyBroker: cfg.BrokerAddr,
 		})
 	}
+	fmt.Println(output.String())
 	return err
 }
 
@@ -503,6 +500,20 @@ func (a *admin) GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsu
 		})
 	} else {
 		rlog.Info("获得ConsumeStats成功", map[string]interface{}{})
+	}
+	return gjson.Parse(string(output.Body)), err
+}
+
+func (a *admin) GetBrokerClusterInfo(ctx context.Context, nameserver string) (gjson.Result, error) {
+	request := &internal.GetBrokerClsuterInfoRequetsHeader{}
+	cmd := remote.NewRemotingCommand(internal.ReqGetBrokerClusterInfo, request, nil)
+	output, err := a.cli.InvokeSync(ctx, nameserver, cmd, 3*time.Second)
+	if err != nil {
+		rlog.Error("Fail Get BrokerClusterInfo", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
+		})
+	} else {
+		rlog.Info("Successful Get BrokerClusterInfo", map[string]interface{}{})
 	}
 	return gjson.Parse(string(output.Body)), err
 }
