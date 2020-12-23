@@ -41,6 +41,7 @@ const (
 	ReqGetConsumerListByGroup           = int16(38)
 	ReqLockBatchMQ                      = int16(41)
 	ReqUnlockBatchMQ                    = int16(42)
+	ReqRegisterBroker                   = int16(103)
 	ReqGetRouteInfoByTopic              = int16(105)
 	ReqGetBrokerClusterInfo             = int16(106)
 	ReqSendBatchMessage                 = int16(320)
@@ -578,5 +579,25 @@ type GetBrokerClsuterInfoRequetsHeader struct {
 
 func (request *GetBrokerClsuterInfoRequetsHeader) Encode() map[string]string {
 	maps := make(map[string]string)
+	return maps
+}
+
+type RegisterBrokerRequestHeader struct {
+	BrokerName   string
+	BrokerAddr   string
+	ClusterName  string
+	HaServerAddr string
+	BrokerId     int
+	Compressed   bool
+}
+
+func (request *RegisterBrokerRequestHeader) Encode() map[string]string {
+	maps := make(map[string]string)
+	maps["brokerName"] = request.BrokerName
+	maps["brokerAddr"] = request.BrokerAddr
+	maps["clusterName"] = request.ClusterName
+	maps["haServerAddr"] = request.HaServerAddr
+	maps["compressed"] = strconv.FormatBool(request.Compressed)
+	maps["brokerId"] = strconv.Itoa(request.BrokerId)
 	return maps
 }

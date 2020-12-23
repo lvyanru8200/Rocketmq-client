@@ -50,6 +50,7 @@ type Admin interface {
 	GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsumeStatsInBroker) (gjson.Result, error)
 	GetBrokerClusterInfo(ctx context.Context, nameserver string) (gjson.Result, error)
 	UpdateConsumerOffset(ctx context.Context, opts ...OptionUpdateConsumerOffset) error
+	DeleteTopicInBroker(topic string, broker string, nameSrvAddr string) error
 	Close() error
 }
 
@@ -210,6 +211,16 @@ func (a *admin) DeleteTopic(ctx context.Context, opts ...OptionDelete) error {
 	return nil
 }
 
+func (a *admin) DeleteTopicInBroker(topic string, broker string, nameSrvAddr string) error {
+	opt, err := a.deleteTopicInBroker(context.Background(), topic, broker)
+	opt, err = a.deleteTopicInNameServer(context.Background(), topic, nameSrvAddr)
+	if err != nil {
+		return err
+	}
+	fmt.Println(opt.String())
+	return err
+}
+
 func (a *admin) GetTopicsByCluster(ctx context.Context, opts ...OptionTopicList) (*simplejson.Json, error) {
 	cfg := defaultTopicList()
 	for _, apply := range opts {
@@ -221,11 +232,11 @@ func (a *admin) GetTopicsByCluster(ctx context.Context, opts ...OptionTopicList)
 	cmd := remote.NewRemotingCommand(internal.GetTopicsByCluster, request, nil)
 	opout, err := a.cli.InvokeSync(ctx, cfg.Nameserver, cmd, 5*time.Second)
 	if err != nil {
-		rlog.Error("获取topic列表失败", map[string]interface{}{
+		rlog.Error("Failed to get the list of corresponding cluster topic", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("获取topic列表成功", map[string]interface{}{})
+		rlog.Info("Get the list of corresponding cluster topic successfully", map[string]interface{}{})
 	}
 	json, err := simplejson.NewJson(opout.Body)
 	if err != nil {
@@ -241,14 +252,16 @@ func (a *admin) GetBrokerRuntimeInfo(ctx context.Context, nameserver string, bro
 	}
 	cmd := remote.NewRemotingCommand(internal.ReqGetBrokerRuntimeInfo, request, nil)
 	opout, err := a.cli.InvokeSync(ctx, broker, cmd, 5*time.Second)
-	json, err := simplejson.NewFromReader(bytes.NewBuffer(opout.Body))
 	if err != nil {
-		rlog.Error("获取BrokerInfo失败", map[string]interface{}{
+		rlog.Error("Failed to get BrokerInfo", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("获取BrokerInfo成功", map[string]interface{}{})
+		rlog.Info("Get BrokerInfo Success", map[string]interface{}{
+			rlog.LogKeyBroker: broker,
+		})
 	}
+	json, err := simplejson.NewFromReader(bytes.NewBuffer(opout.Body))
 	if err != nil {
 		return nil, err
 	}
@@ -267,13 +280,15 @@ func (a *admin) GetConsumeStats(ctx context.Context, opts ...OptionGetConsumeSta
 	cmd := remote.NewRemotingCommand(internal.ReqGetConsumeStats, request, nil)
 	output, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
 	if err != nil {
-		rlog.Error("获取ConsumeStats失败", map[string]interface{}{
+		rlog.Error("Failed to get ConsumeStats", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("获取ConsumeStats成功", map[string]interface{}{})
+		rlog.Info("Get ConsumeStats Success", map[string]interface{}{
+			rlog.LogKeyTopic:         cfg.Topic,
+			rlog.LogKeyConsumerGroup: cfg.ConsumerGroup,
+		})
 	}
-	fmt.Println(string(output.Body))
 	json, err := simplejson.NewJson(output.Body)
 	if err != nil {
 		fmt.Println(err)
@@ -293,18 +308,15 @@ func (a *admin) WipeWritePerm(ctx context.Context, opts ...OptionWipeWritePerm) 
 	cmd := remote.NewRemotingCommand(internal.ReqWipeWritePermOfBroker, request, nil)
 	_, err := a.cli.InvokeSync(ctx, cfg.NamesrvAddr, cmd, 5*time.Second)
 	if err != nil {
-		rlog.Error("禁止写失败", map[string]interface{}{
+		rlog.Error("Disable current broker write failure", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("禁止写成功", map[string]interface{}{
+		rlog.Info("Disable current broker write success", map[string]interface{}{
 			rlog.LogKeyBroker: request.Brokername,
 		})
 	}
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (a *admin) QueryTopicConsumeByWho(ctx context.Context, opts ...OptionQueryTopicConsume) (*simplejson.Json, error) {
@@ -319,11 +331,11 @@ func (a *admin) QueryTopicConsumeByWho(ctx context.Context, opts ...OptionQueryT
 	cmd := remote.NewRemotingCommand(internal.ReqQueryTopicConsumeByWho, request, nil)
 	output, err := a.cli.InvokeSync(ctx, cfg.Brokeraddr, cmd, 5*time.Second)
 	if err != nil {
-		rlog.Error("获取topic对应消费组失败", map[string]interface{}{
+		rlog.Error("Failed to get the consumer group corresponding to the topic: %s", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("获取topic对应消费组成功", map[string]interface{}{
+		rlog.Info("Get the function of the corresponding consumer group of the topic", map[string]interface{}{
 			rlog.LogKeyBroker: request.Topic,
 		})
 	}
@@ -331,7 +343,7 @@ func (a *admin) QueryTopicConsumeByWho(ctx context.Context, opts ...OptionQueryT
 	if err != nil {
 		return nil, err
 	}
-	return json, nil
+	return json, err
 }
 
 func (a *admin) UpdateAndCreateSubscriptionGroup(ctx context.Context, opts ...OptionUpdatesubGroup) error {
@@ -343,17 +355,17 @@ func (a *admin) UpdateAndCreateSubscriptionGroup(ctx context.Context, opts ...Op
 		GroupName: cfg.GroupName,
 	}
 	cmd := remote.NewRemotingCommand(internal.ReqUpdateAndCreateSubscriptionGroup, request, nil)
-	output, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
+	_, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
 	if err != nil {
-		rlog.Error("迁移消费组失败", map[string]interface{}{
+		rlog.Error("Failed to create subgroup", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("迁移消费组成功", map[string]interface{}{
-			rlog.LogKeyBroker: cfg.BrokerAddr,
+		rlog.Info("Create subgroup successful", map[string]interface{}{
+			rlog.LogKeyBroker:        cfg.BrokerAddr,
+			rlog.LogKeyConsumerGroup: cfg.GroupName,
 		})
 	}
-	fmt.Println(output.String())
 	return err
 }
 
@@ -372,11 +384,11 @@ func (a *admin) UpdateTopic(ctx context.Context, opts ...OptionCreate) error {
 	cmd := remote.NewRemotingCommand(internal.ReqCreateTopic, request, nil)
 	_, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
 	if err != nil {
-		rlog.Error("更新topic失败", map[string]interface{}{
+		rlog.Error("Failed to create topic", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("更新topic成功", map[string]interface{}{
+		rlog.Info("Create topic successful", map[string]interface{}{
 			rlog.LogKeyBroker: cfg.BrokerAddr,
 		})
 	}
@@ -394,12 +406,13 @@ func (a *admin) GetConsumerRunningInfo(ctx context.Context, opts ...OptionConsum
 	cmd := remote.NewRemotingCommand(internal.ReqGetConsumerRunningInfo, request, nil)
 	output, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
 	if err != nil {
-		rlog.Error("获取consumer信息失败", map[string]interface{}{
+		rlog.Error("Unavailable ConsumerRunningInfo", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("获取consumer信息成功", map[string]interface{}{
-			rlog.LogKeyBroker: cfg.BrokerAddr,
+		rlog.Info("Get information about the success of the consumer", map[string]interface{}{
+			rlog.LogKeyBroker:        cfg.BrokerAddr,
+			rlog.LogKeyConsumerGroup: cfg.ConsumerGroup,
 		})
 	}
 	return gjson.Parse(string(output.Body)), err
@@ -417,12 +430,13 @@ func (a *admin) DeleteSubscriptionGroup(ctx context.Context, opts ...OptionDelet
 	cmd := remote.NewRemotingCommand(internal.ReqDeleteSubscriptionGroup, request, nil)
 	_, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 5*time.Second)
 	if err != nil {
-		rlog.Error("删除subGroup失败", map[string]interface{}{
+		rlog.Error("Failed to delete subGroup", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("删除subGroup成功", map[string]interface{}{
-			rlog.LogKeyBroker: cfg.BrokerAddr,
+		rlog.Info("Delete subGroup successfully", map[string]interface{}{
+			rlog.LogKeyBroker:        cfg.BrokerAddr,
+			rlog.LogKeyConsumerGroup: cfg.GroupName,
 		})
 	}
 	return err
@@ -441,20 +455,24 @@ func (a *admin) GetConsumerOffset(ctx context.Context, opts ...OptionConsumerOff
 	cmd := remote.NewRemotingCommand(internal.ReqQueryConsumerOffset, request, nil)
 	output, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 3*time.Second)
 	if err != nil {
-		rlog.Error("获得consumeroffset失败", map[string]interface{}{
+		rlog.Error("Unable to get ConsumerOffset", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("获得consumeroffset成功", map[string]interface{}{})
+		rlog.Info("Get ConsumerOffset successful", map[string]interface{}{
+			rlog.LogKeyConsumerGroup: cfg.ConsumerGroup,
+			rlog.LogKeyTopic:         cfg.Topic,
+		})
 	}
 	off, err := strconv.ParseInt(output.ExtFields["offset"], 10, 64)
 	if err != nil {
-		rlog.Error("获取offset失败", map[string]interface{}{
+		rlog.Error("Warning", map[string]interface{}{
+			rlog.LogKeyUnderlayError: err,
 			rlog.LogKeyTopic:         cfg.Topic,
 			rlog.LogKeyConsumerGroup: cfg.ConsumerGroup,
 		})
 	}
-	return off, nil
+	return off, err
 }
 
 func (a *admin) GetRouteInfo(ctx context.Context, opts ...OptionGetRouteInfo) (*internal.TopicRouteData, error) {
@@ -468,21 +486,24 @@ func (a *admin) GetRouteInfo(ctx context.Context, opts ...OptionGetRouteInfo) (*
 	cmd := remote.NewRemotingCommand(internal.ReqGetRouteInfoByTopic, request, nil)
 	output, err := a.cli.InvokeSync(ctx, cfg.NamesrvAddr, cmd, 3*time.Second)
 	if err != nil {
-		rlog.Error("获得topicRoute失败", map[string]interface{}{
+		rlog.Error("Failed to get topic RouteInfo", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("获得topicRoute成功", map[string]interface{}{})
+		rlog.Info("Get topic RouteInfo successfully", map[string]interface{}{
+			rlog.LogKeyTopic: cfg.Topic,
+			"NamesrvAddr":    cfg.NamesrvAddr,
+		})
 	}
 	routeData := &internal.TopicRouteData{}
 	err = routeData.Decode(string(output.Body))
 	if err != nil {
-		rlog.Warning("decode TopicRouteData error: %s", map[string]interface{}{
+		rlog.Warning("decode TopicRouteData error", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 			"topic":                  cfg.Topic,
 		})
 	}
-	return routeData, nil
+	return routeData, err
 }
 
 func (a *admin) GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsumeStatsInBroker) (gjson.Result, error) {
@@ -496,11 +517,11 @@ func (a *admin) GetConsumeStatsInBroker(ctx context.Context, opts ...OptionConsu
 	cmd := remote.NewRemotingCommand(internal.ReqGetBrokerConsumeStats, request, nil)
 	output, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 3*time.Second)
 	if err != nil {
-		rlog.Error("获得ConsumeStats失败", map[string]interface{}{
+		rlog.Error("Failed to get ConsumeStats", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {
-		rlog.Info("获得ConsumeStats成功", map[string]interface{}{})
+		rlog.Info("Get ConsumeStats Success", map[string]interface{}{})
 	}
 	return gjson.Parse(string(output.Body)), err
 }
@@ -533,7 +554,7 @@ func (a *admin) UpdateConsumerOffset(ctx context.Context, opts ...OptionUpdateCo
 	cmd := remote.NewRemotingCommand(internal.ReqUpdateConsumerOffset, request, nil)
 	_, err := a.cli.InvokeSync(ctx, cfg.BrokerAddr, cmd, 3*time.Second)
 	if err != nil {
-		rlog.Error("Fail  Update ConsumerOffset", map[string]interface{}{
+		rlog.Error("Fail Update ConsumerOffset", map[string]interface{}{
 			rlog.LogKeyUnderlayError: err,
 		})
 	} else {

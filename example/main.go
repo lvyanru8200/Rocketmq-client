@@ -2,23 +2,22 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/lvyanru8200/rocketmq-client/admin"
 	"github.com/lvyanru8200/rocketmq-client/primitive"
 )
 
 func main() {
-	nameSrvAddr := []string{"10.21.7.6:32284"}
+	nameSrvAddr := []string{"10.21.7.5:32711"}
 	testAdmin, _ := admin.NewAdmin(admin.WithResolver(primitive.NewPassthroughResolver(nameSrvAddr)))
 	/*		json1, _ := testAdmin.GetTopicsByCluster(context.Background(), admin.WithNameserver("10.21.7.6:32666"), admin.WithClusterTopicList("raft-1"))*/
 	/*		fmt.Println(json1)*/
-	/*	json2, _ := testAdmin.GetTopicsByCluster(context.Background(), admin.WithNameserver("10.21.7.6:32666"), admin.WithClusterTopicList("raft-2"))*/
-	/*	fmt.Println(json2)*/
+	/*		json2, _ := testAdmin.GetTopicsByCluster(context.Background(), admin.WithNameserver("10.21.7.5:32711"), admin.WithClusterTopicList("raft-1"))
+			fmt.Println(json2)*/
 	//topiclist:=json.Get("topicList").MustStringArray()
 	//json,_:=testAdmin.GetConsumerRunningInfo(context.Background(),admin.WithConsumerBrokerAddr("10.21.7.6:54199"),admin.WithConsumerGroup("testGroup"))
 	/*	json,_:=testAdmin.GetBrokerRuntimeInfo(context.Background(),"10.21.7.6:32011","10.21.7.7:56042")*/
 	//json,_:=testAdmin.QueryTopicConsumeByWho(context.Background(),admin.WithBrokeraddr("10.21.7.5:47505"),admin.WithTopic("testcr"))
-	/*		json1, _ := testAdmin.GetRouteInfo(context.Background(), admin.WithNamesrvAddrRoute("10.21.7.5:31010"), admin.WithTopicRoute("testcr"))*/
+	/*		json1, _ := testAdmin.GetRouteInfo(context.Background(), admin.WithNamesrvAddrRoute(" 10.21.7.5:31848"), admin.WithTopicRoute("testcr"))*/
 	//json,_:=testAdmin.GetConsumeStats(context.Background(),admin.WithConsumerGroupGetConsume("testGroup"),admin.WithTopicGroupGetConsume("testcr"),admin.WithBrokerAddrGetConsume("10.21.7.5:47505"))
 	/*		json2, _ := testAdmin.GetConsumeStatsInBroker(context.Background(), admin.WithConsumerStatsInIsOrder(true), admin.WithConsumeStatsInBrokerBroker("10.21.7.6:53080"))
 			p := json2.Get("totalDiff").Int()*/
@@ -55,7 +54,12 @@ func main() {
 	/*	fmt.Println(json1)
 		fmt.Println(json1.QueueDataList[0].BrokerName)*/
 
-	p, _ := testAdmin.GetConsumerOffset(context.Background(), admin.WithConsumeroffsetBrokerAddr("10.21.7.6:45612"), admin.WithConsumerOffsetGroup("testupdate"), admin.WithConsumerOffsetTopic("testcr"))
-	fmt.Println(p)
-	testAdmin.UpdateConsumerOffset(context.Background(), admin.WithUpdateoffsetBrokerAddr("10.21.7.6:45612"), admin.WithUpdateoffsetCommitoffset(p), admin.WithUpdateoffsetConsumerGroup("testupdate"))
+	//p, _ := testAdmin.GetConsumerOffset(context.Background(), admin.WithConsumeroffsetBrokerAddr("10.21.7.6:57537"), admin.WithConsumerOffsetGroup("testGroup"), admin.WithConsumerOffsetTopic("testcr"))
+	//fmt.Println(p)
+	/*	testAdmin.UpdateConsumerOffset(context.Background(), admin.WithUpdateoffsetBrokerAddr("10.21.7.6:57537"), admin.WithUpdateoffsetCommitoffset(523), admin.WithUpdateoffsetConsumerGroup("testGroup"),admin.WithUpdateoffsetTopic("testcr"),
+		admin.WithUpdateoffsetQueueId(1))*/
+	/*err:=testAdmin.DeleteTopicInBroker("testcr","10.21.7.5:52715","10.21.7.6:31551")
+	  fmt.Println(err)*/
+	testAdmin.RegisterBroker(context.Background(), admin.WithRegistBrokerAddr("10.21.7.6:55595"), admin.WithRegistBrokerId(0), admin.WithRegistBrokerName("n21"), admin.WithRegistClusterName("raft-2"), admin.WithRegistNamesrvAddr("10.21.7.5:32711"))
+
 }

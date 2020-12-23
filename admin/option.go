@@ -524,3 +524,56 @@ func WithUpdateoffsetBrokerAddr(broker string) OptionUpdateConsumerOffset {
 		opts.BrokerAddr = broker
 	}
 }
+
+type OptionRegisterBrokerConfig struct {
+	BrokerName   string
+	BrokerAddr   string
+	ClusterName  string
+	HaServerAddr string
+	BrokerId     int
+	compressed   bool
+	NameSrvAddr  string
+}
+
+type OptionRegisterBroker func(broker *OptionRegisterBrokerConfig)
+
+func defaultRegisterBroker() OptionRegisterBrokerConfig {
+	opts := OptionRegisterBrokerConfig{}
+	return opts
+}
+
+func WithRegistBrokerName(broker string) OptionRegisterBroker {
+	return func(opts *OptionRegisterBrokerConfig) {
+		opts.BrokerName = broker
+	}
+}
+
+func WithRegistBrokerAddr(brokerAddr string) OptionRegisterBroker {
+	return func(opts *OptionRegisterBrokerConfig) {
+		opts.BrokerAddr = brokerAddr
+	}
+}
+
+func WithRegistClusterName(cluster string) OptionRegisterBroker {
+	return func(opts *OptionRegisterBrokerConfig) {
+		opts.ClusterName = cluster
+	}
+}
+
+func WithRegistBrokerId(id int) OptionRegisterBroker {
+	return func(opts *OptionRegisterBrokerConfig) {
+		opts.BrokerId = id
+	}
+}
+
+func WithRegistHasrvAddr(haserveraddr string) OptionRegisterBroker {
+	return func(opts *OptionRegisterBrokerConfig) {
+		opts.HaServerAddr = haserveraddr
+	}
+}
+
+func WithRegistNamesrvAddr(naserveraddr string) OptionRegisterBroker {
+	return func(opts *OptionRegisterBrokerConfig) {
+		opts.NameSrvAddr = naserveraddr
+	}
+}
