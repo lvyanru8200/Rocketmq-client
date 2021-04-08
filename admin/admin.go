@@ -51,7 +51,6 @@ type Admin interface {
 	GetBrokerClusterInfo(ctx context.Context, nameserver string) (gjson.Result, error)
 	UpdateConsumerOffset(ctx context.Context, opts ...OptionUpdateConsumerOffset) error
 	DeleteTopicInBroker(topic string, broker string, nameSrvAddr string) error
-	UpdateAndCreateAclConfig(ctx context.Context, brokerAddr string, opts ...OptionUpdateAndCreateAcl) error
 	Close() error
 }
 
@@ -568,34 +567,6 @@ func (a *admin) UpdateConsumerOffset(ctx context.Context, opts ...OptionUpdateCo
 		})
 	} else {
 		rlog.Info("Successful Update ConsumerOffset", map[string]interface{}{})
-	}
-	return err
-}
-
-func (a *admin) UpdateAndCreateAclConfig(ctx context.Context, brokerAddr string, opts ...OptionUpdateAndCreateAcl) error {
-	cfg := defaultUpdateAndCreateAcl()
-	for _, apply := range opts {
-		apply(&cfg)
-	}
-	request := &internal.CreateAccessConfigRequestHeader{
-		AccessKey:          cfg.AccessKey,
-		SecretKey:          cfg.SecretKey,
-		Admin:              cfg.Admin,
-		WhiteRemoteAddress: cfg.WhiteRemoteAddress,
-		DefaultGroupPerm:   cfg.DefaultGroupPerm,
-		DefaultTopicPerm:   cfg.DefaultTopicPerm,
-		TopicPerms:         cfg.TopicPerms,
-		GroupPerms:         cfg.GroupPerms,
-	}
-	cmd := remote.NewRemotingCommand(internal.ReqUpdateAndCreateAclConfig, request, nil)
-	c, err := a.cli.InvokeSync(ctx, brokerAddr, cmd, 20*time.Second)
-	if err != nil {
-		rlog.Error("Fail Update ConsumerOffset", map[string]interface{}{
-			rlog.LogKeyUnderlayError: err,
-		})
-	} else {
-		fmt.Println(c.String())
-		rlog.Info("Successful Update AccessConfig", map[string]interface{}{})
 	}
 	return err
 }
